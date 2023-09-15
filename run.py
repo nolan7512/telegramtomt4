@@ -576,6 +576,10 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
 
     return CALCULATE
 
+def TotalMessHandle()-> None:
+    Trade_Command()
+    PlaceTrade()
+    return
 
 def main() -> None:
     """Runs the Telegram bot."""
@@ -606,7 +610,7 @@ def main() -> None:
 
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, PlaceTrade))
+    dp.add_handler(MessageHandler(Filters.text,TotalMessHandle))
 
     # log all errors
     dp.add_error_handler(error)
