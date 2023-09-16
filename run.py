@@ -386,7 +386,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-
+    context.user_data['trade'] = None
     # checks if the trade has already been parsed or not
     if(context.user_data['trade'] == None):
 
@@ -576,7 +576,7 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
 
     return CALCULATE
 
-def TotalMessHandle()-> None:
+def TotalMessHandle(update: Update, context: CallbackContext)-> None:
     Trade_Command()
     PlaceTrade()
     return
@@ -610,7 +610,7 @@ def main() -> None:
 
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
-    dp.add_handler(MessageHandler(Filters.text, Trade_Command))
+    """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
     dp.add_handler(MessageHandler(Filters.text, PlaceTrade))
 
     # log all errors
