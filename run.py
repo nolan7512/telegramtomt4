@@ -610,7 +610,8 @@ def main() -> None:
 
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
-    dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))
+    dp.add_handler(MessageHandler(Filters.text, Trade_Command))
+    dp.add_handler(MessageHandler(Filters.text, PlaceTrade))
 
     # log all errors
     dp.add_error_handler(error)
