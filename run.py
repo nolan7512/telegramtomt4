@@ -391,7 +391,10 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
 
     try: 
         # parses signal from Telegram message
+        errorMessage1 = f"There was \nError: {update.effective_message.text}\n."
+        update.effective_message.reply_text(errorMessage1)
         trade = ParseSignal(update.effective_message.text)
+        update.effective_message.reply_text(trade)
         
         # checks if there was an issue with parsing the trade
         if(not(trade)):
@@ -399,6 +402,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
 
         # sets the user context trade equal to the parsed trade
         context.user_data['trade'] = trade
+        update.effective_message.reply_text("Parsed done:")
         update.effective_message.reply_text("Trade Successfully Parsed! 🥳\nConnecting to MetaTrader ... \n(May take a while) ⏰")
     
     except Exception as error:
