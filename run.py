@@ -184,10 +184,10 @@ def ParseSignal(signal: str) -> dict:
         trade['Entry'] = 'NOW' 
 
     #Change symbol ordertype from buy/sell to buy limit/sell limit with if : trade['Entry'] != NOW
-    if(trade['OrderType'] == 'Buy' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
-        trade['OrderType'] == 'Buy Limit'
-    elif(trade['OrderType'] == 'Sell' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
-        trade['OrderType'] == 'Sell Limit' 
+    if(trade['OrderType'] == 'Buy' and  flagbuyentry == 0 and trade['Entry'] != ''):
+        trade['OrderType'] = 'Buy Limit'
+    elif(trade['OrderType'] == 'Sell' and  flagbuyentry == 0 and trade['Entry'] != ''):
+        trade['OrderType'] = 'Sell Limit'
         
     #find and add TP
     arraytp = FindTP('TP',signal)
