@@ -3,6 +3,7 @@ import asyncio
 import logging
 import math
 import os
+import re
 
 try:
     from typing import Literal
@@ -97,7 +98,7 @@ def ParseSignal(signal: str) -> dict:
     # converts message to list of strings for parsing
     signal = signal.splitlines()
     signal = [line.rstrip() for line in signal]
-    signalstripemty = [x.strip(' ') for x in signal]
+    #signalstripemty = [x.strip(' ') for x in signal]
 
     trade = {}
 
@@ -138,17 +139,49 @@ def ParseSignal(signal: str) -> dict:
     # checks if the symbol is valid, if not, returns an empty dictionary
     if(trade['Symbol'] not in SYMBOLS):
         return {}
+    # change symbol trade signal
+    if(trade['Symbol'] == 'GOLD'):
+       trade['Symbol'] = 'XAUUSD'
     
+    #Find symbol 'Entry' if found 'entry' will get float entry in Signal and specical Entry = NOW
+    entrygetbuy = FindTP('ENTRY',signal)
+    flagbuyentry = 0
+    if(len(entrygetbuy)>0):
+       trade['Entry'] = float(entrygetbuy[0])
+       flagbuyentry = 1
+        
+   # checks entry for 'BUY'/'SELL' OrderType
+    if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell' and flagbuyentry == 0):
+        
+            
+        getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
+        
+        if(getentryfirstline != ''):
+            trade['Entry'] = float(getentryfirstline)
+            
+        elif(getentryfirstline == '' and signal[1] != ''):            
+           trade['Entry'] = float((signal[1].split())[-1]) 
+           
+        else:
+            trade['Entry'] = float((signal[2].split())[-1])
+
+
+    # checks wheter or not to convert entry to float because of market exectution option ("NOW")
+    if(trade['OrderType'] == 'Buy Limit' or trade['OrderType'] == 'Sell Limit' and flagbuyentry == 0):
+        oneline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
+        if(oneline != ''):
+            trade['Entry'] = float(oneline)
+            
+        elif(oneline == '' and signal[1] != ''):            
+           trade['Entry'] = float((signal[1].split())[-1]) 
+           
+        else:
+            trade['Entry'] = float((signal[2].split())[-1])
+             
+      
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy Now' or trade['OrderType'] == 'Sell Now'):
-        trade['Entry'] = 'NOW'  
-    
-    # checks wheter or not to convert entry to float because of market exectution option ("NOW")
-    if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
-        trade['Entry'] = (signal[1].split())[-1]
-    
-    else:
-        trade['Entry'] = float((signal[1].split())[-1])
+        trade['Entry'] = 'NOW' 
         
     #find and add TP
     arraytp = FindTP('TP',signal)
@@ -159,8 +192,11 @@ def ParseSignal(signal: str) -> dict:
         
     #find and add SL
     stoplosser = FindTP('SL',signal)
+    stoplosserb = FindTP('STOP LOSS',signal)
     if(len(stoplosser)>0):
         trade['StopLoss'] = float(stoplosser[0])
+    elif(len(stoplosserb)>0):
+        trade['StopLoss'] = float(stoplosserb[0])
     else:
         trade['StopLoss'] = float((signal[2].split())[-1])
     
