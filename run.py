@@ -386,12 +386,10 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    if( context.user_data['trade'] == None): 
-        context.user_data['trade'] = {}
-    else:
-        context.user_data['trade'] = {}
+    if context.user_data['trade'] is not None:
+        context.user_data['trade'] = None
     # checks if the trade has already been parsed or not
-    if(context.user_data['trade'] == {}):
+    if(context.user_data['trade'] is None):
 
         try: 
             # parses signal from Telegram message
@@ -411,13 +409,14 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
             update.effective_message.reply_text(errorMessage)
 
             # returns to TRADE state to reattempt trade parsing
-            return #TRADE
+            return TRADE
     
     # attempts connection to MetaTrader and places trade
     asyncio.run(ConnectMetaTrader(update, context.user_data['trade'], True))
     
     # removes trade from user context data
-    context.user_data['trade'] = {}
+    # if context.user_data['trade'] is not None:
+    #     context.user_data['trade'] = None
 
     return ConversationHandler.END
 
@@ -430,7 +429,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
     """
 
     # checks if the trade has already been parsed or not
-    if(context.user_data['trade'] == {}):
+    if(context.user_data['trade'] == None):
 
         try: 
             # parses signal from Telegram message
@@ -525,7 +524,8 @@ def cancel(update: Update, context: CallbackContext) -> int:
     update.effective_message.reply_text("Command has been canceled.")
 
     # removes trade from user context data
-    context.user_data['trade'] = {}
+    if context.user_data['trade'] is not None:
+        context.user_data['trade'] = None
 
     return ConversationHandler.END
 
@@ -553,7 +553,8 @@ def Trade_Command(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
     
     # initializes the user's trade as empty prior to input and parsing
-    context.user_data['trade'] = {}
+    if context.user_data['trade'] is not None:
+        context.user_data['trade'] = None
     
     # asks user to enter the trade
     update.effective_message.reply_text("Please enter the trade that you would like to place.")
@@ -572,17 +573,18 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
 
     # initializes the user's trade as empty prior to input and parsing
-    context.user_data['trade'] = {}
+    if context.user_data['trade'] is not None:
+        context.user_data['trade'] = None
 
     # asks user to enter the trade
     update.effective_message.reply_text("Please enter the trade that you would like to calculate.")
 
     return CALCULATE
 
-def TotalMessHandle(update: Update, context: CallbackContext)-> None:
+def TotalMessHandle(update: Update, context: CallbackContext)-> int:
     Trade_Command()
     PlaceTrade()
-    return
+    return TRADE
 
 def main() -> None:
     """Runs the Telegram bot."""
