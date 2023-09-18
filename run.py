@@ -386,8 +386,6 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    if context.user_data['trade'] is not None:
-        context.user_data['trade'] = None
     # checks if the trade has already been parsed or not
     if(context.user_data['trade'] is None):
 
@@ -415,8 +413,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
     asyncio.run(ConnectMetaTrader(update, context.user_data['trade'], True))
     
     # removes trade from user context data
-    # if context.user_data['trade'] is not None:
-    #     context.user_data['trade'] = None
+    context.user_data['trade'] = None
 
     return ConversationHandler.END
 
@@ -429,7 +426,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
     """
 
     # checks if the trade has already been parsed or not
-    if(context.user_data['trade'] == None):
+    if(context.user_data['trade'] is None):
 
         try: 
             # parses signal from Telegram message
