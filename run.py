@@ -97,7 +97,7 @@ def ParseSignal(signal: str) -> dict:
     # converts message to list of strings for parsing
     signal = signal.splitlines()
     signal = [line.rstrip() for line in signal]
-    signal = [x.strip(' ') for x in signal]
+    signalstripemty = [x.strip(' ') for x in signal]
 
     trade = {}
 
