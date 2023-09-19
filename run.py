@@ -42,7 +42,7 @@ CALCULATE, TRADE, DECISION = range(3)
 SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD','GOLD']
 SYMBOLSPLUS = ['AUD/CAD', 'AUD/CHF', 'AUD/JPY', 'AUD/NZD', 'AUD/USD', 'CAD/CHF', 'CAD/JPY', 'CHF/JPY', 'EUR/AUD', 'EUR/CAD', 'EUR/CHF', 'EUR/GBP', 'EUR/JPY', 'EUR/NZD', 'EUR/USD', 'GBP/AUD', 'GBP/CAD', 'GBP/CHF', 'GBP/JPY', 'GBP/NZD', 'GBP/USD', 'NZD/CAD', 'NZD/CHF', 'NZD/JPY', 'NZD/USD', 'USD/CAD', 'USD/CHF', 'USD/JPY', 'XAG/USD', 'XAU/USD','GOLD']
 TYPETRADE = ['BUY','BUY LIMIT','BUY NOW','SELL','SELL LIMIT','SELL NOW']
-OTHER = ['@','Entry','TP','SL','Stop loss','Take Profit']
+OTHER = ['@','Entry','TP','SL','STOP LOSS','TAKE PROFIT','TARGET PROFIT']
 
 # RISK FACTOR
 RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
@@ -171,11 +171,11 @@ def ParseSignal(signal: str) -> dict:
         if(getentryfirstline != ''):
             trade['Entry'] = float(getentryfirstline)
             
-        elif(getentryfirstline == '' and signal[1] != ''):            
-           trade['Entry'] = float((signal[1].split())[-1]) 
+        # elif(getentryfirstline == '' and signal[1] != ''):            
+        #    trade['Entry'] = float((signal[1].split())[-1]) 
            
-        else:
-            trade['Entry'] = float((signal[2].split())[-1])
+        # else:
+        #     trade['Entry'] = float((signal[2].split())[-1])
 
 
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
