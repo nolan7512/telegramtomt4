@@ -166,14 +166,13 @@ def ParseSignal(signal: str) -> dict:
     if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell' and flagbuyentry == 0):
                   
         getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
-        foundentryflag = 0
         if(getentryfirstline != ''):
             trade['Entry'] = float(getentryfirstline)
-            foundentryflag = 1
-        if(foundentryflag ==0):    
+        if(getentryfirstline == ''):
+            memforfindorderentry = str(trade['OrderType'])
             for i in range(len(signal)):
-              j = signal[i].upper().find(trade['OrderType'],0)
-              if(j!=-1):
+              j = signal[i].upper().find(memforfindorderentry,0)
+              if(j != -1):
                   getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                   if(getentrybyline != ''):
                       trade['Entry'] = float(getentrybyline)
