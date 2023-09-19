@@ -472,7 +472,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
     
     except Exception as error:
         logger.error(f'Error: {error}')
-        errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
+        errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n"
         update.effective_message.reply_text(errorMessage)
 
         # returns to TRADE state to reattempt trade parsing
