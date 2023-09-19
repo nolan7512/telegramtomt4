@@ -79,8 +79,9 @@ def CheckSymbolStr(stringcheck,stringsrc)-> int:
 
 def FindTP(stringcheck,signalsrc):
     takeprofit=[]
+    stringcheckupper = stringcheck.upper()
     for i in range(len(signalsrc)):
-      j = signalsrc[i].upper().find(stringcheck,0)
+      j = signalsrc[i].upper().find(stringcheckupper,0)
       if(j!=-1):
           tp = float((signalsrc[i].split())[-1])
           takeprofit.append(tp)
@@ -210,11 +211,14 @@ def ParseSignal(signal: str) -> dict:
     
     #find and add TP
     arraytp = FindTP('TP',signal)
+    arraytarget = FindTP('Target Profit',signal)
     if(len(arraytp)>0):
         trade['TP'] = arraytp
+    elif(len(arraytp)==0 and len(arraytp)>0):
+        trade['TP'] = arraytarget
     else:
         trade['TP']= [float((signal[3].split())[-1])]
-        
+    
     #find and add SL
     stoplosser = FindTP('SL',signal)
     stoplosserb = FindTP('STOP LOSS',signal)
