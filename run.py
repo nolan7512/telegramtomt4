@@ -39,7 +39,8 @@ logger = logging.getLogger(__name__)
 CALCULATE, TRADE, DECISION = range(3)
 
 # allowed FX symbols
-SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
+SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD','GOLD']
+SYMBOLSPLUS = ['AUD/CAD', 'AUD/CHF', 'AUD/JPY', 'AUD/NZD', 'AUD/USD', 'CAD/CHF', 'CAD/JPY', 'CHF/JPY', 'EUR/AUD', 'EUR/CAD', 'EUR/CHF', 'EUR/GBP', 'EUR/JPY', 'EUR/NZD', 'EUR/USD', 'GBP/AUD', 'GBP/CAD', 'GBP/CHF', 'GBP/JPY', 'GBP/NZD', 'GBP/USD', 'NZD/CAD', 'NZD/CHF', 'NZD/JPY', 'NZD/USD', 'USD/CAD', 'USD/CHF', 'USD/JPY', 'XAG/USD', 'XAU/USD','GOLD']
 TYPETRADE = ['BUY','BUY LIMIT','BUY NOW','SELL','SELL LIMIT','SELL NOW']
 OTHER = ['@','Entry','TP','SL','Stop loss','Take Profit']
 
@@ -130,15 +131,26 @@ def ParseSignal(signal: str) -> dict:
     # returns an empty dictionary if an invalid order type was given
     else:
         return {}
-
-    # extracts symbol from trade signal
-    for element in SYMBOLS:
-        calcu = signal[0].upper().find(element,0)
-        if(calcu!=-1):
-            trade['Symbol'] = element
+       
+    # extracts symbolplus '/' from trade signal if found then replace '/' to ''
+    symbolflag = 0
+    for elemental in SYMBOLSPLUS:
+        calcusymbol = signal[0].upper().find(elemental,0)
+        if(calcusymbol != -1):
+            trade['Symbol'] = elemental.replace('/','')
+            symbolflag = 1
+            
+    # extracts symbol from trade signal        
+    if(symbolflag == 0):                
+        for element in SYMBOLS:
+            calcu = signal[0].upper().find(element,0)
+            if(calcu != -1):
+                trade['Symbol'] = element
+                
     # checks if the symbol is valid, if not, returns an empty dictionary
     if(trade['Symbol'] not in SYMBOLS):
         return {}
+    
     # change symbol trade signal
     if(trade['Symbol'] == 'GOLD'):
        trade['Symbol'] = 'XAUUSD'
@@ -182,13 +194,14 @@ def ParseSignal(signal: str) -> dict:
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy Now' or trade['OrderType'] == 'Sell Now'):
         trade['Entry'] = 'NOW' 
-
+    
     #Change symbol ordertype from buy/sell to buy limit/sell limit with if : trade['Entry'] != NOW
-    if(trade['OrderType'] == 'Buy' and  flagbuyentry == 0 and trade['Entry'] != ''):
-        trade['OrderType'] = 'Buy Limit'
-    elif(trade['OrderType'] == 'Sell' and  flagbuyentry == 0 and trade['Entry'] != ''):
-        trade['OrderType'] = 'Sell Limit'
-        
+    if(trade['OrderType'] == 'Buy' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
+        trade['OrderType'] == 'Buy Limit'
+    elif(trade['OrderType'] == 'Sell' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
+        trade['OrderType'] == 'Sell Limit' 
+    
+    
     #find and add TP
     arraytp = FindTP('TP',signal)
     if(len(arraytp)>0):
