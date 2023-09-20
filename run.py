@@ -162,29 +162,24 @@ def ParseSignal(signal: str) -> dict:
     entrygetbuy = FindTP('ENTRY',signal)
     flagbuyentry = 0
     if(len(entrygetbuy)>0):
-        logger.error('In 174')
         trade['Entry'] = float(entrygetbuy[0])
-        logger.error('Pass 166')
         flagbuyentry = 1
         
    # checks entry for 'BUY'/'SELL' OrderType
-    if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell' and flagbuyentry == 0):
+    if((trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell') and flagbuyentry == 0):
                   
         getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
         if(getentryfirstline != ''):
-            logger.error('In 174')
             trade['Entry'] = float(getentryfirstline)
-            logger.error('Pass 175')
         if(getentryfirstline == ''):
             memforfindorderentry = trade['OrderType'].upper()
             for i in range(1,len(signal)):
-              j = signal[i].upper().find(memforfindorderentry,0)
-              if(j != -1 ):
-                  getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
-                  if(getentrybyline != ''):
-                      logger.error('Pass 185')
-                      trade['Entry'] = float(getentrybyline)
-                      logger.error('Pass 185')
+              if(signal[i] != ''):   
+                  j = signal[i].upper().find(memforfindorderentry,0)
+                  if(j != -1 ):
+                      getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
+                      if(getentrybyline != ''):
+                          trade['Entry'] = float(getentrybyline)
         # elif(getentryfirstline == '' and signal[1] != ''):            
         #    trade['Entry'] = float((signal[1].split())[-1]) 
            
@@ -214,6 +209,10 @@ def ParseSignal(signal: str) -> dict:
         trade['OrderType'] = 'Buy Limit'
     elif(trade['OrderType'] == 'Sell' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
         trade['OrderType'] = 'Sell Limit'
+    elif(trade['OrderType'] == 'Buy' and  trade['Entry'] != 'NOW' and trade['Entry'] == ''):
+        trade['Entry'] = 'NOW'
+    elif(trade['OrderType'] == 'Sell' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
+         trade['Entry'] = 'NOW'
     
     
     #find and add TP
