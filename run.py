@@ -173,7 +173,9 @@ def ParseSignal(signal: str) -> dict:
             memforfindorderentry = str(trade['OrderType'].upper())
             for i in range(len(signal)):
               j = signal[i].upper().find(memforfindorderentry,0)
-              if(j != -1):
+              if(j != -1 and i ==0):
+                 pass
+              elif(j != -1 and i != 0):
                   getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                   if(getentrybyline != ''):
                       trade['Entry'] = float(getentrybyline)
