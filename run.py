@@ -163,6 +163,7 @@ def ParseSignal(signal: str) -> dict:
     flagbuyentry = 0
     if(len(entrygetbuy)>0):
        trade['Entry'] = float(entrygetbuy[0])
+       print('pass 166')
        flagbuyentry = 1
         
    # checks entry for 'BUY'/'SELL' OrderType
@@ -171,16 +172,18 @@ def ParseSignal(signal: str) -> dict:
         getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
         if(getentryfirstline != ''):
             trade['Entry'] = float(getentryfirstline)
+            print('pass 174')
         if(getentryfirstline == ''):
-            memforfindorderentry = str(trade['OrderType'].upper())
-            for i in range(len(signal)):
+            memforfindorderentry = trade['OrderType'].upper()
+            for i in range(1,len(signal)):
               j = signal[i].upper().find(memforfindorderentry,0)
-              if(j != -1 and i ==0):
-                 pass
-              elif(j != -1 and i != 0):
+              if(j != -1 ):
+                  print(' tim duoc')
+                  print(i)
                   getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                   if(getentrybyline != ''):
                       trade['Entry'] = float(getentrybyline)
+                      print('pass 185')
             
         # elif(getentryfirstline == '' and signal[1] != ''):            
         #    trade['Entry'] = float((signal[1].split())[-1]) 
