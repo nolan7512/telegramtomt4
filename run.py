@@ -117,17 +117,19 @@ def ParseSignal(signal: str) -> dict:
     elif('Sell Stop'.lower() in signal[0].lower() or 'Sell Stop'.lower() in signal[1].lower() or 'Sell Stop'.lower() in signal[2].lower()):
         trade['OrderType'] = 'Sell Stop'
 
+    elif('Buy Now'.lower() in signal[0].lower() or 'Buy Now'.lower() in signal[1].lower() or 'Buy Now'.lower() in signal[2].lower()):
+        trade['OrderType'] = 'Buy Now'
+                
+    elif('Sell Now'.lower() in signal[0].lower() or 'Sell Now'.lower() in signal[1].lower() or 'Sell Now'.lower() in signal[2].lower()):
+         trade['OrderType'] = 'Sell Now'
+         
     elif('Buy'.lower() in signal[0].lower() or 'Buy'.lower() in signal[1].lower() or 'Buy'.lower() in signal[2].lower()):
         trade['OrderType'] = 'Buy'
-        
-    elif('Buy Now'.lower() in signal[0].lower() or 'Buy Now'.lower() in signal[1].lower() or 'Buy Now'.lower() in signal[2].lower()):
-            trade['OrderType'] = 'Buy Now'
-    
+         
     elif('Sell'.lower() in signal[0].lower() or 'Sell'.lower() in signal[1].lower() or 'Sell'.lower() in signal[2].lower()):
         trade['OrderType'] = 'Sell'
         
-    elif('Sell Now'.lower() in signal[0].lower() or 'Sell Now'.lower() in signal[1].lower() or 'Sell Now'.lower() in signal[2].lower()):
-         trade['OrderType'] = 'Sell Now'
+    
     
     # returns an empty dictionary if an invalid order type was given
     else:
@@ -202,7 +204,7 @@ def ParseSignal(signal: str) -> dict:
       
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if(trade['OrderType'] == 'Buy Now' or trade['OrderType'] == 'Sell Now'):
-        trade['Entry'] = 'NOW' 
+        trade['Entry'] = 'NOW'
     
     #Change symbol ordertype from buy/sell to buy limit/sell limit with if : trade['Entry'] != NOW
     if(trade['OrderType'] == 'Buy' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
