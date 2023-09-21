@@ -313,6 +313,8 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
 
     for count, takeProfit in enumerate(takeProfitPips):
         table.add_row([f'TP {count + 1}', f'({takeProfit} pips)'])
+    table.add_row(['\n', '']) 
+    table.add_row(['Stop Loss', trade['StopLoss']])
     for count, tradeTPflt in enumerate(tradeTP):
         table.add_row([f'TP {count + 1}', f'{tradeTPflt}'])
 
