@@ -77,15 +77,16 @@ def CheckSymbolStr(stringcheck,stringsrc)-> int:
         return checkstr
     return checkstr
 
-def FindTP(stringcheck,signalsrc):
-    takeprofit=[]
-    stringcheckupper = stringcheck.upper()
+def FindTP(alphacheck,signalsrc) -> float: 
+    arrayfind=[]
+    alphacheck = alphacheck.lower()
     for i in range(len(signalsrc)):
-      j = signalsrc[i].upper().find(stringcheckupper,0)
-      if(j!=-1):
-          tp = float((signalsrc[i].split())[-1])
-          takeprofit.append(tp)
-    return takeprofit
+        if(signalsrc[i] != ''):
+            j = signalsrc[i].lower().find(alphacheck,0)
+            if(j!=-1):
+                tpfindvar = float((signalsrc[i].split())[-1])
+                arrayfind.append(tpfindvar)
+    return arrayfind
 
 def ParseSignal(signal: str) -> dict:
     """Starts process of parsing signal and entering trade on MetaTrader account.
@@ -159,28 +160,27 @@ def ParseSignal(signal: str) -> dict:
        trade['Symbol'] = 'XAUUSD'
     
     #Find symbol 'Entry' if found 'entry' will get float entry in Signal and specical Entry = NOW
-    entrygetbuy = FindTP('Entry',signal)
+    entrygetbuy = FindTP('ENTRY',signal)
     flagbuyentry = 0
     if(len(entrygetbuy)>0):
         trade['Entry'] = float(entrygetbuy[0])
         flagbuyentry = 1
         
    # checks entry for 'BUY'/'SELL' OrderType
-    if((trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell') and flagbuyentry == 0):            
-        getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
-        if(getentryfirstline != ''):
-            trade['Entry'] = float(getentryfirstline)
-        if(getentryfirstline == ''):
-            memforfindorderentry = trade['OrderType'].upper()
-            for i in range(1,len(signal)):
-              if(signal[i] != ''):   
-                  j = signal[i].upper().find(memforfindorderentry,0)
-                  if(j != -1 ):
-                      getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
-                      if(getentrybyline != ''):
-                          trade['Entry'] = float(getentrybyline)
-                      else:
-                          trade['Entry'] = ''
+    if((trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell') and flagbuyentry == 0):                
+        memforfindorderentry = trade['OrderType'].upper()
+        for i in range(len(signal)):
+          if(signal[i] != ''):   
+              j = signal[i].upper().find(memforfindorderentry,0)
+              if(j != -1 and i == 0 ):
+                getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
+                if(getentryfirstline != ''):
+                    trade['Entry'] = float(getentryfirstline)                      
+              elif(j != -1 and i > 0):
+                  getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
+                  if(getentrybyline != ''):
+                      trade['Entry'] = float(getentrybyline)
+
         # elif(getentryfirstline == '' and signal[1] != ''):            
         #    trade['Entry'] = float((signal[1].split())[-1]) 
            
@@ -274,16 +274,19 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     takeProfitPips = []
     for takeProfit in trade['TP']:
         takeProfitPips.append(abs(round((takeProfit - trade['Entry']) / multiplier)))
-
+    tradeTP =[]
+    for takeProfit in trade['TP']:
+        tradeTP.append(takeProfit)
+        
     # creates table with trade information
-    table = CreateTable(trade, balance, stopLossPips, takeProfitPips)
+    table = CreateTable(trade, balance, stopLossPips, takeProfitPips, tradeTP)
     
     # sends user trade information and calcualted risk
     update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
 
     return
 
-def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: int) -> PrettyTable:
+def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: int, tradeTP : float) -> PrettyTable:
     """Creates PrettyTable object to display trade information to user.
 
     Arguments:
@@ -309,7 +312,7 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
 
     for count, takeProfit in enumerate(takeProfitPips):
-        table.add_row([f'TP {count + 1}', f'{takeProfit} pips'])
+        table.add_row([f'TP {count + 1}', f'{tradeTP}', f'({takeProfit} pips)'])
 
     table.add_row(['\nRisk Factor', '\n{:,.0f} %'.format(trade['RiskFactor'] * 100)])
     table.add_row(['Position Size', trade['PositionSize']])
