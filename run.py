@@ -79,7 +79,7 @@ def CheckSymbolStr(stringcheck,stringsrc)-> int:
 
 def FindTP(stringcheck,signalsrc):
     takeprofit=[]
-    stringcheckupper = str(stringcheck.upper())
+    stringcheckupper = stringcheck.upper()
     for i in range(len(signalsrc)):
       j = signalsrc[i].upper().find(stringcheckupper,0)
       if(j!=-1):
@@ -159,15 +159,14 @@ def ParseSignal(signal: str) -> dict:
        trade['Symbol'] = 'XAUUSD'
     
     #Find symbol 'Entry' if found 'entry' will get float entry in Signal and specical Entry = NOW
-    entrygetbuy = FindTP('ENTRY',signal)
+    entrygetbuy = FindTP('Entry',signal)
     flagbuyentry = 0
     if(len(entrygetbuy)>0):
         trade['Entry'] = float(entrygetbuy[0])
         flagbuyentry = 1
         
    # checks entry for 'BUY'/'SELL' OrderType
-    if((trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell') and flagbuyentry == 0):
-                  
+    if((trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell') and flagbuyentry == 0):            
         getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
         if(getentryfirstline != ''):
             trade['Entry'] = float(getentryfirstline)
@@ -180,6 +179,8 @@ def ParseSignal(signal: str) -> dict:
                       getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                       if(getentrybyline != ''):
                           trade['Entry'] = float(getentrybyline)
+                      else:
+                          trade['Entry'] = ''
         # elif(getentryfirstline == '' and signal[1] != ''):            
         #    trade['Entry'] = float((signal[1].split())[-1]) 
            
@@ -188,7 +189,7 @@ def ParseSignal(signal: str) -> dict:
 
 
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
-    if(trade['OrderType'] == 'Buy Limit' or trade['OrderType'] == 'Sell Limit' and flagbuyentry == 0):
+    if((trade['OrderType'] == 'Buy Limit' or trade['OrderType'] == 'Sell Limit') and flagbuyentry == 0):
         oneline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
         if(oneline != ''):
             trade['Entry'] = float(oneline)
@@ -211,7 +212,7 @@ def ParseSignal(signal: str) -> dict:
         trade['OrderType'] = 'Sell Limit'
     elif(trade['OrderType'] == 'Buy' and  trade['Entry'] != 'NOW' and trade['Entry'] == ''):
         trade['Entry'] = 'NOW'
-    elif(trade['OrderType'] == 'Sell' and  trade['Entry'] != 'NOW' and trade['Entry'] != ''):
+    elif(trade['OrderType'] == 'Sell' and  trade['Entry'] != 'NOW' and trade['Entry'] == ''):
          trade['Entry'] = 'NOW'
     
     
