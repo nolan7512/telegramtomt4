@@ -185,7 +185,9 @@ def ParseSignal(signal: str) -> dict:
               if(j != -1 and i == 0 ):
                 getentryfirstline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                 if(getentryfirstline != ''):
-                    trade['Entry'] = float(getentryfirstline)                      
+                    trade['Entry'] = float(getentryfirstline)
+                else:
+                    trade['Entry'] = ''    
               elif(j != -1 and i > 0):
                   getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                   if(getentrybyline != ''):
