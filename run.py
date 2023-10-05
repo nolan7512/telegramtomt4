@@ -88,6 +88,16 @@ def FindTP(alphacheck,signalsrc) -> float:
                 arrayfind.append(tpfindvar)
     return arrayfind
 
+# def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
+#     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
+
+#     try:
+#         entry_price = float(re.split('[a-z]+|[-,/,@]', signal[first_line_with_order_type], flags=re.IGNORECASE)[-1])
+#     except ValueError:
+#         entry_price = None
+#     return entry_price   
+   
+
 def ParseSignal(signal: str) -> dict:
     """Starts process of parsing signal and entering trade on MetaTrader account.
 
@@ -180,6 +190,8 @@ def ParseSignal(signal: str) -> dict:
                   getentrybyline = re.split('[a-z]+|[-,/,@]',signal[i] ,flags=re.IGNORECASE)[-1]
                   if(getentrybyline != ''):
                       trade['Entry'] = float(getentrybyline)
+                  else:
+                      trade['Entry'] = ''
 
         # elif(getentryfirstline == '' and signal[1] != ''):            
         #    trade['Entry'] = float((signal[1].split())[-1]) 
