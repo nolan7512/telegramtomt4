@@ -88,6 +88,10 @@ def FindTP(alphacheck,signalsrc) -> float:
                 arrayfind.append(tpfindvar)
     return arrayfind
 
+def remove_pips(signal):
+  temp = re.sub(r"(pips|\(.+\))|(pip|\(.+\))|(scalper|\(.+\))|(intraday|\(.+\))|(swing|\(.+\))", "", signal)
+  return temp
+
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
 
@@ -109,8 +113,10 @@ def ParseSignal(signal: str) -> dict:
     """
 
     # converts message to list of strings for parsing
+    signal = remove_pips(signal)
     signal = signal.splitlines()
     signal = [line.rstrip() for line in signal]
+    
     #signalstripemty = [x.strip(' ') for x in signal]
 
     trade = {}
