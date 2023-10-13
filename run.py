@@ -36,7 +36,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 # possibles states for conversation handler
-CALCULATE, TRADE, DECISION = range(3)
+CALCULATE, TRADE, DECISION, ERROR = range(4)
 
 # allowed FX symbols
 SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD','GOLD']
@@ -100,7 +100,18 @@ def remove_pips(signal):
 #     except ValueError:
 #         entry_price = None
 #     return entry_price   
-   
+def replace_spaces(text):
+  """
+  Thay thế khoảng trắng nằm giữa 2 số thành dấu .
+
+  Args:
+    text: Chuỗi cần xử lý
+
+  Returns:
+    Chuỗi đã được xử lý
+  """
+  temp = re.sub(r"(\d+) +(\d+)(?!0)", r"\1.\2", text)
+  return temp
 
 def ParseSignal(signal: str) -> dict:
     """Starts process of parsing signal and entering trade on MetaTrader account.
@@ -114,6 +125,7 @@ def ParseSignal(signal: str) -> dict:
 
     # converts message to list of strings for parsing
     signal = remove_pips(signal)
+    signal = replace_spaces(signal)
     signal = signal.splitlines()
     signal = [line.rstrip() for line in signal]
     
@@ -685,10 +697,28 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
 
     return CALCULATE
 
+ # Function for handle message
 def TotalMessHandle(update: Update, context: CallbackContext)-> int:
-    Trade_Command()
-    PlaceTrade()
+    checktruesignal = CheckSignalMessage(update.effective_message.text)
+    temp = Trade_Command()
+    if temp == TRADE and checktruesignal == TRADE :
+        PlaceTrade()
     return TRADE
+
+# Function for check message is a signal format true
+def CheckSignalMessage(signal:str)-> int:
+    # extracts symbolplus '/' from trade signal if found then replace '/' to ''
+    for elemental in SYMBOLSPLUS:
+        calcusymbol = signal[0].upper().find(elemental,0)
+        if(calcusymbol != -1):          
+            return TRADE   
+   # extracts symbol from trade signal                      
+    for element in SYMBOLS:
+        calcu = signal[0].upper().find(element,0)
+        if(calcu != -1):
+            return TRADE
+    return ERROR
+    
 
 def main() -> None:
     """Runs the Telegram bot."""
@@ -720,7 +750,7 @@ def main() -> None:
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
-    dp.add_handler(MessageHandler(Filters.text, PlaceTrade))
+    dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
     dp.add_error_handler(error)
