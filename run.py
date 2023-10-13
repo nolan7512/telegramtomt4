@@ -669,11 +669,11 @@ def Trade_Command(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
     
     # initializes the user's trade as empty prior to input and parsing
-    if context.user_data['trade'] is not None:
-        context.user_data['trade'] = None
+    # if context.user_data['trade'] is not None:
+    #     context.user_data['trade'] = None
     
     # asks user to enter the trade
-    update.effective_message.reply_text("Please enter the trade that you would like to place.")
+    # update.effective_message.reply_text("Please enter the trade that you would like to place.")
 
     return TRADE
 
