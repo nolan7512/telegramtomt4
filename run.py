@@ -709,6 +709,8 @@ def TotalMessHandle(update: Update, context: CallbackContext)-> int:
 
 # Function for check message is a signal format true
 def CheckSignalMessage(signal:str)-> int:
+    signal = signal.splitlines()
+    signal = [line.rstrip() for line in signal]
     # extracts symbolplus '/' from trade signal if found then replace '/' to ''
     for elemental in SYMBOLSPLUS:
         calcusymbol = signal[0].upper().find(elemental,0)
