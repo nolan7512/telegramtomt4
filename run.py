@@ -699,6 +699,7 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
 
 # Function for handle message
 def TotalMessHandle(update: Update, context: CallbackContext)-> int:
+    update.effective_message.reply_text (update)
     checktruesignal = CheckSignalMessage(update.effective_message.text)
     update.effective_message.reply_text (checktruesignal)
     temp = Trade_Command(update,context)
