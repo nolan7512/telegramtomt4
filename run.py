@@ -409,10 +409,10 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
         account_information = await connection.get_account_information()
 
         update.effective_message.reply_text("Successfully connected to MetaTrader!\nCalculating trade risk ... 🤔")
-
+        price = await connection.get_symbol_price(symbol=trade['Symbol'])
         # checks if the order is a market execution to get the current price of symbol
         if(trade['Entry'] == 'NOW'):
-            price = await connection.get_symbol_price(symbol=trade['Symbol'])
+            
 
             # uses bid price if the order type is a buy
             if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Buy Now'):
@@ -430,7 +430,7 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
 
             # enters trade on to MetaTrader account
             update.effective_message.reply_text("Entering trade on MetaTrader Account ... 👨🏾‍💻")
-
+        
             try:
                 # executes buy market execution order
                # Kiểm tra nếu giá hiện tại thấp hơn giá Entry cho lệnh Buy Limit
