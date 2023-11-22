@@ -30,6 +30,8 @@ APP_URL = os.environ.get("APP_URL")
 # Port number for Telegram bot web hook
 PORT = int(os.environ.get('PORT', '8443'))
 
+PLAN = os.environ.get('PLAN','A')
+
 
 # Enables logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -46,6 +48,7 @@ OTHER = ['@','Entry','TP','SL','STOP LOSS','TAKE PROFIT','TARGET PROFIT']
 
 # RISK FACTOR
 RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
+RISK_PERTRADE = float(os.environ.get("RISK_PERTRADE"))
 
 # Helper Functions
 def CheckSymbolArray(stringcheck,array)-> int:
@@ -87,6 +90,15 @@ def FindTP(alphacheck,signalsrc) -> float:
                 tpfindvar = float((signalsrc[i].split())[-1])
                 arrayfind.append(tpfindvar)
     return arrayfind
+
+def calculate_rr_coefficient(take_profit_pips, stop_loss_pips):
+    rr_coefficients = []
+    
+    for tp in take_profit_pips:
+        rr_coefficient = tp / stop_loss_pips
+        rr_coefficients.append(rr_coefficient)
+    
+    return rr_coefficients
 
 def remove_pips(signal):
   temp = re.sub(r"(pips|\(.+\))|(pip|\(.+\))|(scalper|\(.+\))|(intraday|\(.+\))|(swing|\(.+\))", "", signal)
@@ -270,6 +282,7 @@ def ParseSignal(signal: str) -> dict:
     
     # adds risk factor to trade
     trade['RiskFactor'] = RISK_FACTOR
+    trade['RiskPerTrade'] = RISK_PERTRADE
 
     return trade
 
@@ -299,9 +312,18 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     # calculates the stop loss in pips
     stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
 
-    # calculates the position size using stop loss and RISK FACTOR
-    trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
+    if PLAN == 'A':
+        # calculates the position size using stop loss and RISK FACTOR
+        trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
+    elif PLAN == 'B':
+        # calculates the position size using stop loss and RISK FACTOR
+        rr_coefficient = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])       
+        for rr in rr_coefficient:
+            position_size =  math.floor(((balance * trade['RickPerTrade'] * rr) / stopLossPips) / 10 * 100) / 100
+            trade['PositionSize'].append(position_size)
+            trade['RR'].append(rr)
 
+        
     # calculates the take profit(s) in pips
     takeProfitPips = []
     for takeProfit in trade['TP']:
@@ -329,45 +351,91 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     Returns:
         a Pretty Table object that contains trade information
     """
+    if PLAN == 'A':
 
-    # creates prettytable object
-    table = PrettyTable()
-    
-    table.title = "Trade Information"
-    table.field_names = ["Key", "Value"]
-    table.align["Key"] = "l"  
-    table.align["Value"] = "l" 
-
-    table.add_row([trade["OrderType"] , trade["Symbol"]])
-    table.add_row(['Entry\n', trade['Entry']])
-
-    table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
-
-    for count, takeProfit in enumerate(takeProfitPips):
-        table.add_row([f'TP {count + 1}', f'({takeProfit} pips)'])
-    table.add_row(['\n', '']) 
-    table.add_row(['Stop Loss', trade['StopLoss']])
-    for count, tradeTPflt in enumerate(tradeTP):
-        table.add_row([f'TP {count + 1}', f'{tradeTPflt}'])
-
-    table.add_row(['\nRisk Factor', '\n{:,.0f} %'.format(trade['RiskFactor'] * 100)])
-    table.add_row(['Position Size', trade['PositionSize']])
-    
-    table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
-    table.add_row(['Potential Loss', '$ {:,.2f}'.format(round((trade['PositionSize'] * 10) * stopLossPips, 2))])
-
-    # total potential profit from trade
-    totalProfit = 0
-
-    for count, takeProfit in enumerate(takeProfitPips):
-        profit = round((trade['PositionSize'] * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
-        table.add_row([f'TP {count + 1} Profit', '$ {:,.2f}'.format(profit)])
+        # creates prettytable object
+        table = PrettyTable()
         
-        # sums potential profit from each take profit target
-        totalProfit += profit
+        table.title = "Trade Information"
+        table.field_names = ["Key", "Value"]
+        table.align["Key"] = "l"  
+        table.align["Value"] = "l" 
 
-    table.add_row(['\nTotal Profit', '\n$ {:,.2f}'.format(totalProfit)])
+        table.add_row([trade["OrderType"] , trade["Symbol"]])
+        table.add_row(['Entry\n', trade['Entry']])
 
+        table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
+
+        for count, takeProfit in enumerate(takeProfitPips):
+            table.add_row([f'TP {count + 1}', f'({takeProfit} pips)'])
+        table.add_row(['\n', '']) 
+        table.add_row(['Stop Loss', trade['StopLoss']])
+        for count, tradeTPflt in enumerate(tradeTP):
+            table.add_row([f'TP {count + 1}', f'{tradeTPflt}'])
+
+        table.add_row(['\nRisk Factor', '\n{:,.0f} %'.format(trade['RiskFactor'] * 100)])
+        table.add_row(['Position Size', trade['PositionSize']])
+        
+        table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
+        table.add_row(['Potential Loss', '$ {:,.2f}'.format(round((trade['PositionSize'] * 10) * stopLossPips, 2))])
+
+        # total potential profit from trade
+        totalProfit = 0
+
+        for count, takeProfit in enumerate(takeProfitPips):
+            profit = round((trade['PositionSize'] * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
+            table.add_row([f'TP {count + 1} Profit', '$ {:,.2f}'.format(profit)])
+            
+            # sums potential profit from each take profit target
+            totalProfit += profit
+
+        table.add_row(['\nTotal Profit', '\n$ {:,.2f}'.format(totalProfit)])
+    elif PLAN == 'B':
+        # creates prettytable object
+        table = PrettyTable()
+        
+        table.title = "Trade Information"
+        table.field_names = ["Key", "Value"]
+        table.align["Key"] = "l"  
+        table.align["Value"] = "l" 
+
+        table.add_row([trade["OrderType"] , trade["Symbol"]])
+        table.add_row(['Entry\n', trade['Entry']])
+
+        table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
+
+        for count, takeProfit in enumerate(takeProfitPips):
+            table.add_row([f'TP {count + 1}', f'({takeProfit} pips)'])
+        table.add_row(['\n', '']) 
+        table.add_row(['Stop Loss', trade['StopLoss']])
+        for count, tradeTPflt in enumerate(tradeTP):
+            table.add_row([f'TP {count + 1}', f'{tradeTPflt}'])
+
+        table.add_row(['\nRiskPerTrade', '\n{:,.0f} %'.format(trade['RiskPerTrade'] * 100)])
+
+
+        for count, position_size in enumerate(trade['PositionSize']):
+            table.add_row([f'Position Size {count + 1}', position_size])
+
+        # total potential loss from trade
+        totalLoss = 0
+        table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
+        for count, position_size in enumerate(trade['PositionSize']):
+            potential_loss = round((position_size * 10) * stopLossPips, 2)
+            table.add_row([f'Potential Loss {count + 1}', '$ {:,.2f}'.format(potential_loss)])
+            totalLoss += potential_loss
+
+        # total potential profit from trade
+        totalProfit = 0
+
+        for count, takeProfit in enumerate(takeProfitPips):
+            profit = round((trade['PositionSize'] * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
+            table.add_row([f'TP {count + 1} Profit', '$ {:,.2f}'.format(profit)])
+            
+            # sums potential profit from each take profit target
+            totalProfit += profit
+        table.add_row(['\nTotal Loss', '\n$ {:,.2f}'.format(totalLoss)])
+        table.add_row(['Total Profit', '$ {:,.2f}'.format(totalProfit)])             
     return table
 
 async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
@@ -423,7 +491,7 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 trade['Entry'] = float(price['ask'])
 
         # produces a table with trade information
-        GetTradeInformation(update, trade, account_information['balance'])
+        #GetTradeInformation(update, trade, account_information['balance'])
             
         # checks if the user has indicated to enter trade
         if(enterTrade == True):
@@ -448,26 +516,48 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 # Kiểm tra nếu giá hiện tại thấp hơn giá Entry cho lệnh Sell Limit
                 elif trade['OrderType'] == 'Sell Limit' and float(price['bid']) < trade['Entry']:
                     trade['OrderType'] = 'Sell Limit'
-
-                # Tiếp tục thực hiện lệnh tương ứng
-                for takeProfit in trade['TP']:
-                    if trade['OrderType'] == 'Buy':
-                        result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Buy Now':
-                        result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Buy Limit':
-                        result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Buy Stop':
-                        result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Sell':
-                        result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Sell Now':
-                        result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Sell Limit':
-                        result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                    elif trade['OrderType'] == 'Sell Stop':
-                        result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
                 
+                # produces a table with trade information
+                GetTradeInformation(update, trade, account_information['balance'])
+                if PLAN == 'A' :
+                # Tiếp tục thực hiện lệnh tương ứng
+                    for takeProfit in trade['TP']:
+                        if trade['OrderType'] == 'Buy':
+                            result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Buy Now':
+                            result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Buy Limit':
+                            result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Buy Stop':
+                            result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Sell':
+                            result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Sell Now':
+                            result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Sell Limit':
+                            result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                        elif trade['OrderType'] == 'Sell Stop':
+                            result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                elif PLAN == 'B' :
+                    positionSize = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])
+                    for i, take_profit in enumerate(trade['TP']):
+                        position_size = positionSize[i]
+                        if trade['OrderType'] == 'Buy':
+                            result = await connection.create_market_buy_order(trade['Symbol'], position_size, trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Buy Now':
+                            result = await connection.create_market_buy_order(trade['Symbol'], position_size, trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Buy Limit':
+                            result = await connection.create_limit_buy_order(trade['Symbol'], position_size, trade['Entry'], trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Buy Stop':
+                            result = await connection.create_stop_buy_order(trade['Symbol'], position_size, trade['Entry'], trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Sell':
+                            result = await connection.create_market_sell_order(trade['Symbol'], position_size, trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Sell Now':
+                            result = await connection.create_market_sell_order(trade['Symbol'], position_size, trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Sell Limit':
+                            result = await connection.create_limit_sell_order(trade['Symbol'], position_size, trade['Entry'], trade['StopLoss'], take_profit)
+                        elif trade['OrderType'] == 'Sell Stop':
+                            result = await connection.create_stop_sell_order(trade['Symbol'], position_size, trade['Entry'], trade['StopLoss'], take_profit)
                 # sends success message to user
                 update.effective_message.reply_text("Trade entered successfully! 💰")
                 
