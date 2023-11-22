@@ -94,8 +94,8 @@ def FindTP(alphacheck,signalsrc) -> float:
 def calculate_rr_coefficient(take_profit_pips, stop_loss_pips):
     rr_coefficients = []
     
-    for tp in take_profit_pips:
-        rr_coefficient = tp / stop_loss_pips
+    for tp in enumerate(take_profit_pips):
+        rr_coefficient = float(tp / stop_loss_pips)
         rr_coefficients.append(rr_coefficient)
     
     return rr_coefficients
@@ -315,13 +315,13 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     if PLAN == 'A':
         # calculates the position size using stop loss and RISK FACTOR
         trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
-    elif PLAN == 'B':
-        # calculates the position size using stop loss and RISK FACTOR
-        rr_coefficient = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])       
-        for rr in rr_coefficient:
-            position_size =  math.floor(((balance * trade['RiskPerTrade'] * rr) / stopLossPips) / 10 * 100) / 100
-            trade['PositionSize'].append(position_size)
-            trade['RR'].append(rr)
+    # elif PLAN == 'B':
+    #     # calculates the position size using stop loss and RISK FACTOR
+    #     rr_coefficient = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])       
+    #     for rr in rr_coefficient:
+    #         position_size =  math.floor(((balance * trade['RiskPerTrade'] * rr) / stopLossPips) / 10 * 100) / 100
+    #         trade['PositionSize'].append(position_size)
+    #         trade['RR'].append(rr)
 
         
     # calculates the take profit(s) in pips
@@ -403,7 +403,7 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         table.add_row(['Entry\n', trade['Entry']])
 
         table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
-
+        positionSize = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])
         for count, takeProfit in enumerate(takeProfitPips):
             table.add_row([f'TP {count + 1}', f'({takeProfit} pips)'])
         table.add_row(['\n', '']) 
@@ -414,13 +414,14 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         table.add_row(['\nRiskPerTrade', '\n{:,.0f} %'.format(trade['RiskPerTrade'] * 100)])
 
 
-        for count, position_size in enumerate(trade['PositionSize']):
+        for count, position_size in enumerate(positionSize):
             table.add_row([f'Position Size {count + 1}', position_size])
 
         # total potential loss from trade
         totalLoss = 0
+        
         table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
-        for count, position_size in enumerate(trade['PositionSize']):
+        for count, position_size in enumerate(positionSize):
             potential_loss = round((position_size * 10) * stopLossPips, 2)
             table.add_row([f'Potential Loss {count + 1}', '$ {:,.2f}'.format(potential_loss)])
             totalLoss += potential_loss
@@ -428,10 +429,11 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         # total potential profit from trade
         totalProfit = 0
 
-        for count, takeProfit in enumerate(takeProfitPips):
+        for count, takeProfit in enumerate(takeProfitPips):         
+            position_sizes = positionSize[count]
             # Retrieve the corresponding position size for the current take profit level
-            position_sz = trade['PositionSize'][count]
-            profit = round((position_sz * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
+            #position_sz = trade['PositionSize'][count]
+            profit = round((position_sizes * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
             table.add_row([f'TP {count + 1} Profit', '$ {:,.2f}'.format(profit)])
             
             # sums potential profit from each take profit target
