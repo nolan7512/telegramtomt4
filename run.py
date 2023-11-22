@@ -327,12 +327,15 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
         trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
     elif PLAN == 'B':
         # calculates the position size using stop loss and RISK FACTOR
-        rr_coefficient = calculate_rr_coefficient(takeProfitPips,stopLossPips)       
+        rr_coefficient = calculate_rr_coefficient(takeProfitPips,stopLossPips)
+        positionSize = []
+        rickandreward = []       
         for rr in rr_coefficient:
             position_size =  math.floor(((balance * trade['RiskPerTrade'] * rr) / stopLossPips) / 10 * 100) / 100
-            trade['PositionSize'].append(position_size)
-            trade['RR'].append(rr)
-
+            positionSize.append(position_size)
+            rickandreward.append(rr)
+        trade['RR'] = rickandreward
+        trade['PositionSize'] = positionSize
     # creates table with trade information
     table = CreateTable(trade, balance, stopLossPips, takeProfitPips, tradeTP)
     
