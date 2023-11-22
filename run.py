@@ -429,7 +429,9 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         totalProfit = 0
 
         for count, takeProfit in enumerate(takeProfitPips):
-            profit = round((trade['PositionSize'] * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
+            # Retrieve the corresponding position size for the current take profit level
+            position_sz = trade['PositionSize'][count]
+            profit = round((position_sz * 10 * (1 / len(takeProfitPips))) * takeProfit, 2)
             table.add_row([f'TP {count + 1} Profit', '$ {:,.2f}'.format(profit)])
             
             # sums potential profit from each take profit target
