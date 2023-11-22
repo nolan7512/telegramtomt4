@@ -312,17 +312,7 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     # calculates the stop loss in pips
     stopLossPips = abs(round((trade['StopLoss'] - trade['Entry']) / multiplier))
 
-    if PLAN == 'A':
-        # calculates the position size using stop loss and RISK FACTOR
-        trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
-    # elif PLAN == 'B':
-    #     # calculates the position size using stop loss and RISK FACTOR
-    #     rr_coefficient = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])       
-    #     for rr in rr_coefficient:
-    #         position_size =  math.floor(((balance * trade['RiskPerTrade'] * rr) / stopLossPips) / 10 * 100) / 100
-    #         trade['PositionSize'].append(position_size)
-    #         trade['RR'].append(rr)
-
+   
         
     # calculates the take profit(s) in pips
     takeProfitPips = []
@@ -331,7 +321,18 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     tradeTP =[]
     for takeProfit in trade['TP']:
         tradeTP.append(takeProfit)
-        
+    
+    if PLAN == 'A':
+        # calculates the position size using stop loss and RISK FACTOR
+        trade['PositionSize'] = math.floor(((balance * trade['RiskFactor']) / stopLossPips) / 10 * 100) / 100
+    elif PLAN == 'B':
+        # calculates the position size using stop loss and RISK FACTOR
+        rr_coefficient = calculate_rr_coefficient(takeProfitPips,stopLossPips)       
+        for rr in rr_coefficient:
+            position_size =  math.floor(((balance * trade['RiskPerTrade'] * rr) / stopLossPips) / 10 * 100) / 100
+            trade['PositionSize'].append(position_size)
+            trade['RR'].append(rr)
+
     # creates table with trade information
     table = CreateTable(trade, balance, stopLossPips, takeProfitPips, tradeTP)
     
@@ -403,7 +404,8 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
         table.add_row(['Entry\n', trade['Entry']])
 
         table.add_row(['Stop Loss', '{} pips'.format(stopLossPips)])
-        positionSize = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])
+        positionSize = trade['PositionSize']
+
         for count, takeProfit in enumerate(takeProfitPips):
             table.add_row([f'TP {count + 1}', f'({takeProfit} pips)'])
         table.add_row(['\n', '']) 
@@ -415,17 +417,22 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
 
 
         for count, position_size in enumerate(positionSize):
-            table.add_row([f'Position Size {count + 1}', position_size])
-
+            if isinstance(position_size, (int, float)):
+                rounded_position_size = round(position_size, 2)
+                table.add_row([f'Position Size {count + 1}', rounded_position_size])
+            else:
+                print(f"Skipping non-numeric value at index {count}")
         # total potential loss from trade
         totalLoss = 0
         
         table.add_row(['\nCurrent Balance', '\n$ {:,.2f}'.format(balance)])
         for count, position_size in enumerate(positionSize):
-            potential_loss = round((position_size * 10) * stopLossPips, 2)
-            table.add_row([f'Potential Loss {count + 1}', '$ {:,.2f}'.format(potential_loss)])
-            totalLoss += potential_loss
-
+            if isinstance(position_size, (int, float)):
+                potential_loss = round((position_size * 10) * stopLossPips, 2)
+                table.add_row([f'Potential Loss {count + 1}', '$ {:,.2f}'.format(potential_loss)])
+                totalLoss += potential_loss
+            else:
+                print(f"Skipping non-numeric value at index {count}")
         # total potential profit from trade
         totalProfit = 0
 
@@ -543,9 +550,8 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                         elif trade['OrderType'] == 'Sell Stop':
                             result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
                 elif PLAN == 'B' :
-                    positionSize = calculate_rr_coefficient(trade['TP'],trade['StopLoss'])
                     for i, take_profit in enumerate(trade['TP']):
-                        position_size = positionSize[i]
+                        position_size = trade['PositionSize'][i]
                         if trade['OrderType'] == 'Buy':
                             result = await connection.create_market_buy_order(trade['Symbol'], position_size, trade['StopLoss'], take_profit)
                         elif trade['OrderType'] == 'Buy Now':
