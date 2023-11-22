@@ -94,7 +94,7 @@ def FindTP(alphacheck,signalsrc) -> float:
 def calculate_rr_coefficient(take_profit_pips, stop_loss_pips):
     rr_coefficients = []
     
-    for tp in enumerate(take_profit_pips):
+    for tp in take_profit_pips:
         rr_coefficient = float(tp / stop_loss_pips)
         rr_coefficients.append(rr_coefficient)
     
