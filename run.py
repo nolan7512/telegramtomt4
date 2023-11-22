@@ -358,9 +358,8 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     if PLAN == 'A':
 
         # creates prettytable object
-        table = PrettyTable()
-        tittleAI = 'AI - Risk Position Size'     
-        table.title = "Trade Information\n"+tittleAI
+        table = PrettyTable()    
+        table.title = "Trade InformationAI - Risk Position Size"
         table.field_names = ["Key", "Value"]
         table.align["Key"] = "l"  
         table.align["Value"] = "l" 
@@ -397,8 +396,7 @@ def CreateTable(trade: dict, balance: float, stopLossPips: int, takeProfitPips: 
     elif PLAN == 'B':
         # creates prettytable object
         table = PrettyTable()
-        tittleAI = 'AI - R:R Kelly Criterion'
-        table.title = "Trade Information\n"+tittleAI
+        table.title = "Trade Information AI - R:R Kelly Criterion"
         table.field_names = ["Key", "Value"]
         table.align["Key"] = "l"  
         table.align["Value"] = "l" 
