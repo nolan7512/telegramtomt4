@@ -180,7 +180,7 @@ async def get_open_trades(update: Update):
         print(f"Error getting open trades: {e}")
         return []
 
-def create_table(data, is_pending=True):
+async def create_table(data, is_pending=True):
     table = PrettyTable()
     headers = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
     if not is_pending:
@@ -196,21 +196,20 @@ def create_table(data, is_pending=True):
 
     return table
 
-def pending_orders(update: Update, context: CallbackContext) -> None:
+async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
         update.message.reply_text("received pending orders command")
-        pending_orders_data = get_pending_orders(update)
-        table = create_table(pending_orders_data)
-        total_profit = sum(order["profit"] for order in pending_orders_data)
-        update.message.reply_text(f"Pending Orders:\n{table}\nTotal Profit: {total_profit}")
+        pending_orders_data = await get_pending_orders(update)
+        table = await create_table(pending_orders_data)
+        update.message.reply_text(f"Pending Trades:\n{table}")
     except Exception as e:
         update.message.reply_text(f"Error getting pending orders: {e}")
 
-def open_trades(update: Update, context: CallbackContext) -> None:
+async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
         update.message.reply_text("received open orders command")
-        open_trades_data = get_open_trades(update)
-        table = create_table(open_trades_data, is_pending=False)
+        open_trades_data = await get_open_trades(update)
+        table = await create_table(open_trades_data, is_pending=False)
         update.message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
         update.message.reply_text(f"Error getting open trades: {e}")
