@@ -110,7 +110,7 @@ def remove_pips(signal):
   return temp
 
 # Lấy danh sách pending orders
-async def get_pending_orders():
+async def get_pending_orders(update: Update, context: CallbackContext):
     try:
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
@@ -138,13 +138,15 @@ async def get_pending_orders():
         orders = await connection.get_orders()
         await connection.close()
         await account.undeploy()
+        
+        update.message.reply_text(orders)
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
         return []
 
 # Lấy danh sách open trades
-async def get_open_trades():
+async def get_open_trades(update: Update, context: CallbackContext):
     try:
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
@@ -195,7 +197,7 @@ def create_table(data, is_pending=True):
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
-        pending_orders_data = await get_pending_orders()
+        pending_orders_data = await get_pending_orders(update,context)
         table = create_table(pending_orders_data)
         total_profit = sum(order["profit"] for order in pending_orders_data)
         update.message.reply_text(f"Pending Orders:\n{table}\nTotal Profit: {total_profit}")
@@ -204,7 +206,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
 
 async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
-        open_trades_data = await get_open_trades()
+        open_trades_data = await get_open_trades(update,context)
         table = create_table(open_trades_data, is_pending=False)
         update.message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
