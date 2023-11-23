@@ -204,7 +204,10 @@ async def create_table(data, is_pending=True):
             headers.remove("Profit")
         table.field_names = headers
 
-        for position in json_data.get("positions", []):
+        # Lựa chọn key dựa trên loại dữ liệu (positions hoặc orders)
+        data_key = "positions" if "positions" in json_data else "orders"
+
+        for position in json_data.get(data_key, []):
             # Chuyển đổi các đối tượng datetime thành chuỗi trước khi thêm vào table
             row = [
                 position.get("id", ""),
