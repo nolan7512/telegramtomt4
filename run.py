@@ -909,8 +909,8 @@ def main() -> None:
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
-    dp.add_handler(CommandHandler("open_trades", open_trades_command))
-    dp.add_handler(CommandHandler("pending_orders", pending_orders_command))
+    dp.add_handler(CommandHandler("open_trades", open_trades))
+    dp.add_handler(CommandHandler("pending_orders", pending_orders))
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
