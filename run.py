@@ -110,8 +110,9 @@ def remove_pips(signal):
   return temp
 
 # Lấy danh sách pending orders
-async def get_pending_orders(update: Update, context: CallbackContext):
+async def get_pending_orders(update: Update):
     try:
+        update.message.reply_text("Start get pending orders")
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
         initial_state = account.state
@@ -145,8 +146,9 @@ async def get_pending_orders(update: Update, context: CallbackContext):
         return []
 
 # Lấy danh sách open trades
-async def get_open_trades(update: Update, context: CallbackContext):
+async def get_open_trades(update: Update):
     try:
+        update.message.reply_text("Start get open orders")
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
         initial_state = account.state
@@ -194,18 +196,20 @@ def create_table(data, is_pending=True):
 
     return table
 
-async def pending_orders(update: Update, context: CallbackContext) -> None:
+def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
-        pending_orders_data = await get_pending_orders()
+        update.message.reply_text("received pending orders command")
+        pending_orders_data = get_pending_orders(update)
         table = create_table(pending_orders_data)
         total_profit = sum(order["profit"] for order in pending_orders_data)
         update.message.reply_text(f"Pending Orders:\n{table}\nTotal Profit: {total_profit}")
     except Exception as e:
         update.message.reply_text(f"Error getting pending orders: {e}")
 
-async def open_trades(update: Update, context: CallbackContext) -> None:
+def open_trades(update: Update, context: CallbackContext) -> None:
     try:
-        open_trades_data = await get_open_trades()
+        update.message.reply_text("received open orders command")
+        open_trades_data = get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
         update.message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
@@ -956,8 +960,8 @@ def main() -> None:
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
-    dp.add_handler(CommandHandler("open_trades", open_trades))
-    dp.add_handler(CommandHandler("pending_orders", pending_orders))
+    dp.add_handler(CommandHandler("opentrades", open_trades))
+    dp.add_handler(CommandHandler("pendingorders", pending_orders))
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
