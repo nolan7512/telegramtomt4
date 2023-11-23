@@ -112,7 +112,7 @@ def remove_pips(signal):
 # Lấy danh sách pending orders
 async def get_pending_orders(update: Update):
     try:
-        update.message.reply_text("Start get pending orders")
+        update.effective_message.reply_text("Start get pending orders")
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
         initial_state = account.state
@@ -133,7 +133,7 @@ async def get_pending_orders(update: Update):
         # wait until terminal state synchronized to the local state
         logger.info('Waiting for SDK to synchronize to terminal state ...')
         await connection.wait_synchronized()
-        update.message.reply_text("Start get orders")
+        update.effective_message.reply_text("Start get orders")
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
@@ -143,12 +143,13 @@ async def get_pending_orders(update: Update):
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
+        update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
 # Lấy danh sách open trades
 async def get_open_trades(update: Update):
     try:
-        update.message.reply_text("Start get open orders")
+        update.effective_message.reply_text("Start get open orders")
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
         initial_state = account.state
@@ -169,7 +170,7 @@ async def get_open_trades(update: Update):
         # wait until terminal state synchronized to the local state
         logger.info('Waiting for SDK to synchronize to terminal state ...')
         await connection.wait_synchronized()
-        update.message.reply_text("Start get position")
+        update.effective_message.reply_text("Start get position")
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         trades = await connection.get_positions()
@@ -178,6 +179,7 @@ async def get_open_trades(update: Update):
         return trades
     except Exception as e:
         print(f"Error getting open trades: {e}")
+        update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
 async def create_table(data, is_pending=True):
@@ -198,21 +200,21 @@ async def create_table(data, is_pending=True):
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
-        update.message.reply_text("received pending orders command")
+        update.effective_message.reply_text("Received pending orders command")
         pending_orders_data = await get_pending_orders(update)
         table = await create_table(pending_orders_data)
-        update.message.reply_text(f"Pending Trades:\n{table}")
+        update.effective_message.reply_text(f"Pending Trades:\n{table}")
     except Exception as e:
-        update.message.reply_text(f"Error getting pending orders: {e}")
+        update.effective_message.reply_text(f"Error getting pending orders: {e}")
 
 async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
-        update.message.reply_text("received open orders command")
+        update.effective_message.reply_text("Received open orders command")
         open_trades_data = await get_open_trades(update)
         table = await create_table(open_trades_data, is_pending=False)
-        update.message.reply_text(f"Open Trades:\n{table}")
+        update.effective_message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
-        update.message.reply_text(f"Error getting open trades: {e}")
+        update.effective_message.reply_text(f"Error getting open trades: {e}")
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
