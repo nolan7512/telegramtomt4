@@ -114,7 +114,30 @@ async def get_pending_orders():
     try:
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
-        orders = await account.get_pending_orders()
+        initial_state = account.state
+        deployed_states = ['DEPLOYING', 'DEPLOYED']
+
+        if initial_state not in deployed_states:
+            #  wait until account is deployed and connected to broker
+            logger.info('Deploying account')
+            await account.deploy()
+
+        logger.info('Waiting for API server to connect to broker ...')
+        await account.wait_connected()
+
+        # connect to MetaApi API
+        connection = account.get_rpc_connection()
+        await connection.connect()
+
+        # wait until terminal state synchronized to the local state
+        logger.info('Waiting for SDK to synchronize to terminal state ...')
+        await connection.wait_synchronized()
+
+        # obtains account information from MetaTrader server
+        # account_information = await connection.get_account_information()
+        orders = await connection.get_orders()
+        await connection.close()
+        await account.undeploy()
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
@@ -125,7 +148,30 @@ async def get_open_trades():
     try:
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
-        trades = await account.get_trades()
+        initial_state = account.state
+        deployed_states = ['DEPLOYING', 'DEPLOYED']
+
+        if initial_state not in deployed_states:
+            #  wait until account is deployed and connected to broker
+            logger.info('Deploying account')
+            await account.deploy()
+
+        logger.info('Waiting for API server to connect to broker ...')
+        await account.wait_connected()
+
+        # connect to MetaApi API
+        connection = account.get_rpc_connection()
+        await connection.connect()
+
+        # wait until terminal state synchronized to the local state
+        logger.info('Waiting for SDK to synchronize to terminal state ...')
+        await connection.wait_synchronized()
+
+        # obtains account information from MetaTrader server
+        # account_information = await connection.get_account_information()
+        trades = await connection.get_positions()
+        await connection.close()
+        await account.undeploy()
         return trades
     except Exception as e:
         print(f"Error getting open trades: {e}")
