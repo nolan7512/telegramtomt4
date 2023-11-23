@@ -217,10 +217,10 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         update.effective_message.reply_text(f"Error getting open trades: {e}")
 
 def handle_pending_orders(update: Update, context: CallbackContext):
-    context.dispatcher.run_async(pending_orders, update)
+    asyncio.run(pending_orders(update,context))
 
 def handle_open_trades(update: Update, context: CallbackContext):
-    context.dispatcher.run_async(open_trades, update)
+    asyncio.run(open_trades(update,context))
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
 
