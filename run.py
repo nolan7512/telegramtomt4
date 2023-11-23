@@ -182,18 +182,25 @@ async def get_open_trades(update: Update):
         update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
-def create_table(data, is_pending=True):
+async def create_table(data, is_pending=True):
     table = PrettyTable()
-    headers = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
+    headers = ["Id", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
     if not is_pending:
         headers.remove("Profit")
     table.field_names = headers
 
-    for order in data:
-        row = [order["orderId"],order["createTime"], order["type"],
-               order["symbol"], order["volume"], order["entryPrice"], order["stopLoss"], order["takeProfit"]]
-        if not is_pending:
-            row.append(order["profit"])
+    for position in data["positions"]:
+        row = [
+            position["id"],
+            position["time"],
+            position["type"],
+            position["symbol"],
+            position["volume"],
+            position["openPrice"],
+            position["stopLoss"],
+            position["takeProfit"],
+            position["profit"] if not is_pending else None
+        ]
         table.add_row(row)
 
     return table
