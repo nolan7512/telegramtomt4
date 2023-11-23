@@ -205,14 +205,13 @@ async def create_table(data, is_pending=True):
         for position in json_data.get("positions", []):
             row = [
                 position.get("id", ""),
-                position.get("time", ""),
                 position.get("type", ""),
                 position.get("symbol", ""),
                 position.get("volume", ""),
                 position.get("openPrice", ""),
                 position.get("stopLoss", ""),
                 position.get("takeProfit", ""),
-                position.get("profit", "") if not is_pending else None
+                # position.get("profit", "") if not is_pending else None
             ]
             table.add_row(row)
 
