@@ -132,13 +132,12 @@ async def get_pending_orders(update: Update, context: CallbackContext):
         # wait until terminal state synchronized to the local state
         logger.info('Waiting for SDK to synchronize to terminal state ...')
         await connection.wait_synchronized()
-
+        update.message.reply_text("Start get orders")
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
         await connection.close()
         await account.undeploy()
-        
         update.message.reply_text(orders)
         return orders
     except Exception as e:
@@ -168,7 +167,7 @@ async def get_open_trades(update: Update, context: CallbackContext):
         # wait until terminal state synchronized to the local state
         logger.info('Waiting for SDK to synchronize to terminal state ...')
         await connection.wait_synchronized()
-
+        update.message.reply_text("Start get position")
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         trades = await connection.get_positions()
@@ -197,7 +196,7 @@ def create_table(data, is_pending=True):
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
-        pending_orders_data = await get_pending_orders(update,context)
+        pending_orders_data = await get_pending_orders()
         table = create_table(pending_orders_data)
         total_profit = sum(order["profit"] for order in pending_orders_data)
         update.message.reply_text(f"Pending Orders:\n{table}\nTotal Profit: {total_profit}")
@@ -206,7 +205,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
 
 async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
-        open_trades_data = await get_open_trades(update,context)
+        open_trades_data = await get_open_trades()
         table = create_table(open_trades_data, is_pending=False)
         update.message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
