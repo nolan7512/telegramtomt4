@@ -4,6 +4,7 @@ import logging
 import math
 import os
 import re
+import json
 
 try:
     from typing import Literal
@@ -189,7 +190,10 @@ async def create_table(data, is_pending=True):
         headers.remove("Profit")
     table.field_names = headers
 
-    for position in data["positions"]:
+    # Giả sử data là một danh sách với hai chuỗi
+    json_data = json.loads(data[1])  # Chuyển đổi chuỗi JSON thành đối tượng Python
+
+    for position in json_data["positions"]:
         row = [
             position["id"],
             position["time"],
@@ -204,6 +208,7 @@ async def create_table(data, is_pending=True):
         table.add_row(row)
 
     return table
+
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
