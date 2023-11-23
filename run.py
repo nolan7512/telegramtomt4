@@ -183,6 +183,8 @@ async def get_open_trades(update: Update):
         update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
+from datetime import datetime
+
 async def create_table(data, is_pending=True):
     try:
         # Kiểm tra xem data có phải là chuỗi không
@@ -203,15 +205,17 @@ async def create_table(data, is_pending=True):
         table.field_names = headers
 
         for position in json_data.get("positions", []):
+            # Chuyển đổi các đối tượng datetime thành chuỗi trước khi thêm vào table
             row = [
                 position.get("id", ""),
+                str(position.get("time", "")),
                 position.get("type", ""),
                 position.get("symbol", ""),
                 position.get("volume", ""),
                 position.get("openPrice", ""),
                 position.get("stopLoss", ""),
                 position.get("takeProfit", ""),
-                # position.get("profit", "") if not is_pending else None
+                position.get("profit", "") if not is_pending else None
             ]
             table.add_row(row)
 
@@ -220,6 +224,7 @@ async def create_table(data, is_pending=True):
         # Xử lý lỗi khi có vấn đề với định dạng dữ liệu
         print(f"Error creating table: {e}")
         return None
+
 
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
