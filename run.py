@@ -112,7 +112,7 @@ def remove_pips(signal):
 def open_trades_command(update: Update, context: CallbackContext) -> None:
     if open_trades:
         table = PrettyTable()
-        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
+        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
 
         for order_id, trade_info in open_trades.items():
             table.add_row([order_id] + trade_info)
@@ -126,7 +126,7 @@ def open_trades_command(update: Update, context: CallbackContext) -> None:
 def pending_orders_command(update: Update, context: CallbackContext) -> None:
     if pending_orders:
         table = PrettyTable()
-        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
+        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
 
         for order_id, order_info in pending_orders.items():
             table.add_row([order_id] + order_info)
