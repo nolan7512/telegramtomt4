@@ -190,8 +190,16 @@ async def create_table(data, is_pending=True):
         headers.remove("Profit")
     table.field_names = headers
 
-    # Giả sử data là một danh sách với hai chuỗi
-    json_data = json.loads(data[1])  # Chuyển đổi chuỗi JSON thành đối tượng Python
+    # Kiểm tra xem data có phải là chuỗi không
+    if isinstance(data, str):
+        # Nếu là chuỗi, chuyển đổi thành đối tượng Python
+        json_data = json.loads(data)
+    elif isinstance(data, dict):
+        # Nếu là từ điển, sử dụng trực tiếp
+        json_data = data
+    else:
+        # Nếu không phải là chuỗi hoặc từ điển, xử lý lỗi hoặc trả về
+        raise ValueError("Invalid data format")
 
     for position in json_data["positions"]:
         row = [
