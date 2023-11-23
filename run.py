@@ -14,7 +14,7 @@ from metaapi_cloud_sdk import MetaApi
 from prettytable import PrettyTable
 from telegram import ParseMode, Update
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, ConversationHandler, CallbackContext
-from metaapi_cloud_sdk.clients.metaApi.models import DateUtils
+
 
 # MetaAPI Credentials
 API_KEY = os.environ.get("API_KEY")
@@ -32,6 +32,7 @@ APP_URL = os.environ.get("APP_URL")
 PORT = int(os.environ.get('PORT', '8443'))
 
 PLAN = os.environ.get('PLAN','A')
+
 
 
 # Enables logging
@@ -138,7 +139,7 @@ def create_table(data, is_pending=True):
     table.field_names = headers
 
     for order in data:
-        row = [order["orderId"], DateUtils.format(order["createTime"]), order["type"],
+        row = [order["orderId"],order["createTime"], order["type"],
                order["symbol"], order["volume"], order["entryPrice"], order["stopLoss"], order["takeProfit"]]
         if not is_pending:
             row.append(order["profit"])
