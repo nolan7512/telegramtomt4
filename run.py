@@ -31,6 +31,8 @@ APP_URL = os.environ.get("APP_URL")
 PORT = int(os.environ.get('PORT', '8443'))
 
 PLAN = os.environ.get('PLAN','A')
+open_trades = {}
+pending_orders = {}
 
 
 # Enables logging
@@ -106,6 +108,37 @@ def calculate_rr_coefficient(take_profit_pips, stop_loss_pips):
 def remove_pips(signal):
   temp = re.sub(r"(pips|\(.+\))|(pip|\(.+\))|(scalper|\(.+\))|(intraday|\(.+\))|(swing|\(.+\))", "", signal)
   return temp
+
+def open_trades_command(update: Update, context: CallbackContext) -> None:
+    if open_trades:
+        table = PrettyTable()
+        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
+
+        for order_id, trade_info in open_trades.items():
+            table.add_row([order_id] + trade_info)
+
+        message = f"Open Trades:\n{table}"
+    else:
+        message = "No open trades at the moment."
+
+    update.message.reply_text(message)
+
+def pending_orders_command(update: Update, context: CallbackContext) -> None:
+    if pending_orders:
+        table = PrettyTable()
+        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
+
+        for order_id, order_info in pending_orders.items():
+            table.add_row([order_id] + order_info)
+
+        total_profit = sum(float(order_info[-1]) for order_info in pending_orders.values())
+        table.add_row(["Total", "", "", "", "", "", "", "", f"{total_profit:.2f}"])
+
+        message = f"Pending Orders:\n{table}"
+    else:
+        message = "No pending orders at the moment."
+
+    update.message.reply_text(message)
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
@@ -718,15 +751,15 @@ def help(update: Update, context: CallbackContext) -> None:
     help_message = "This bot is used to automatically enter trades onto your MetaTrader account directly from Telegram. To begin, ensure that you are authorized to use this bot by adjusting your Python script or environment variables.\n\nThis bot supports all trade order types (Market Execution, Limit, and Stop)\n\nAfter an extended period away from the bot, please be sure to re-enter the start command to restart the connection to your MetaTrader account."
     commands = "List of commands:\n/start : displays welcome message\n/help : displays list of commands and example trades\n/trade : takes in user inputted trade for parsing and placement\n/calculate : calculates trade information for a user inputted trade"
     trade_example = "Example Trades 💴:\n\n"
-    market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nSL 1.14336\nTP 1.28930\nTP 1.29845\n\n"
-    limit_example = "Limit Execution:\nBUY LIMIT GBPUSD\nEntry 1.14480\nSL 1.14336\nTP 1.28930\n\n"
-    note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP1 while the other uses TP2.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
-
+    # market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nSL 1.14336\nTP 1.28930\nTP 1.29845\n\n"
+    # limit_example = "Limit Execution:\nBUY LIMIT GBPUSD\nEntry 1.14480\nSL 1.14336\nTP 1.28930\n\n"
+    # note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP1 while the other uses TP2.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
+    commandtrade = "open_trades/pending_orders"
     # sends messages to user
     update.effective_message.reply_text(help_message)
     update.effective_message.reply_text(commands)
-    update.effective_message.reply_text(trade_example + market_execution_example + limit_example + note)
-
+    # update.effective_message.reply_text(trade_example + market_execution_example + limit_example + note + commandtrade)
+    update.effective_message.reply_text( commandtrade)
     return
 
 def cancel(update: Update, context: CallbackContext) -> int:
@@ -852,6 +885,8 @@ def main() -> None:
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
+    dp.add_handler(CommandHandler("open_trades", open_trades_command))
+    dp.add_handler(CommandHandler("pending_orders", pending_orders_command))
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
