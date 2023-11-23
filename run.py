@@ -87,8 +87,11 @@ def FindTP(alphacheck,signalsrc) -> float:
         if(signalsrc[i] != ''):
             j = signalsrc[i].lower().find(alphacheck,0)
             if(j!=-1):
-                tpfindvar = float((signalsrc[i].split())[-1])
-                arrayfind.append(tpfindvar)
+                try:
+                    tpfindvar = float((signalsrc[i].split())[-1])
+                    arrayfind.append(tpfindvar)
+                except ValueError:
+                    pass
     return arrayfind
 
 def calculate_rr_coefficient(take_profit_pips, stop_loss_pips):
