@@ -182,7 +182,7 @@ async def get_open_trades(update: Update):
         update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
-async def create_table(data, is_pending=True):
+def create_table(data, is_pending=True):
     table = PrettyTable()
     headers = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
     if not is_pending:
@@ -202,7 +202,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
         update.effective_message.reply_text("Received pending orders command")
         pending_orders_data = await get_pending_orders(update)
-        table = await create_table(pending_orders_data)
+        table = create_table(pending_orders_data)
         update.effective_message.reply_text(f"Pending Trades:\n{table}")
     except Exception as e:
         update.effective_message.reply_text(f"Error getting pending orders: {e}")
@@ -211,11 +211,16 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
         update.effective_message.reply_text("Received open orders command")
         open_trades_data = await get_open_trades(update)
-        table = await create_table(open_trades_data, is_pending=False)
+        table = create_table(open_trades_data, is_pending=False)
         update.effective_message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
         update.effective_message.reply_text(f"Error getting open trades: {e}")
 
+def handle_pending_orders(update: Update, context: CallbackContext):
+    context.run(pending_orders, update)
+
+def handle_open_trades(update: Update, context: CallbackContext):
+    context.run(open_trades, update)
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
 
@@ -961,8 +966,8 @@ def main() -> None:
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
-    dp.add_handler(MessageHandler(Filters.command & Filters.regex('opentrades'), open_trades))
-    dp.add_handler(MessageHandler(Filters.command & Filters.regex('pendingorders'), pending_orders))
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('pendingorders'), handle_pending_orders))
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('opentrades'), handle_open_trades))
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
