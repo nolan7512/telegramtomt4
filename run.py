@@ -14,6 +14,7 @@ from metaapi_cloud_sdk import MetaApi
 from prettytable import PrettyTable
 from telegram import ParseMode, Update
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, ConversationHandler, CallbackContext
+from metaapi_cloud_sdk.clients.metaApi.models import DateUtils
 
 # MetaAPI Credentials
 API_KEY = os.environ.get("API_KEY")
@@ -31,8 +32,6 @@ APP_URL = os.environ.get("APP_URL")
 PORT = int(os.environ.get('PORT', '8443'))
 
 PLAN = os.environ.get('PLAN','A')
-open_trades = {}
-pending_orders = {}
 
 
 # Enables logging
@@ -109,36 +108,60 @@ def remove_pips(signal):
   temp = re.sub(r"(pips|\(.+\))|(pip|\(.+\))|(scalper|\(.+\))|(intraday|\(.+\))|(swing|\(.+\))", "", signal)
   return temp
 
-def open_trades_command(update: Update, context: CallbackContext) -> None:
-    if open_trades:
-        table = PrettyTable()
-        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
+# Lấy danh sách pending orders
+async def get_pending_orders():
+    try:
+        api = MetaApi(API_KEY)
+        account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
+        orders = await account.get_pending_orders()
+        return orders
+    except Exception as e:
+        print(f"Error getting pending orders: {e}")
+        return []
 
-        for order_id, trade_info in open_trades.items():
-            table.add_row([order_id] + trade_info)
+# Lấy danh sách open trades
+async def get_open_trades():
+    try:
+        api = MetaApi(API_KEY)
+        account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
+        trades = await account.get_trades()
+        return trades
+    except Exception as e:
+        print(f"Error getting open trades: {e}")
+        return []
 
-        message = f"Open Trades:\n{table}"
-    else:
-        message = "No open trades at the moment."
+def create_table(data, is_pending=True):
+    table = PrettyTable()
+    headers = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
+    if not is_pending:
+        headers.remove("Profit")
+    table.field_names = headers
 
-    update.message.reply_text(message)
+    for order in data:
+        row = [order["orderId"], DateUtils.format(order["createTime"]), order["type"],
+               order["symbol"], order["volume"], order["entryPrice"], order["stopLoss"], order["takeProfit"]]
+        if not is_pending:
+            row.append(order["profit"])
+        table.add_row(row)
 
-def pending_orders_command(update: Update, context: CallbackContext) -> None:
-    if pending_orders:
-        table = PrettyTable()
-        table.field_names = ["OrderId", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
+    return table
 
-        for order_id, order_info in pending_orders.items():
-            table.add_row([order_id] + order_info)
+async def pending_orders(update: Update, context: CallbackContext) -> None:
+    try:
+        pending_orders_data = await get_pending_orders()
+        table = create_table(pending_orders_data)
+        total_profit = sum(order["profit"] for order in pending_orders_data)
+        update.message.reply_text(f"Pending Orders:\n{table}\nTotal Profit: {total_profit}")
+    except Exception as e:
+        update.message.reply_text(f"Error getting pending orders: {e}")
 
-        total_profit = sum(float(order_info[-1]) for order_info in pending_orders.values())
-        table.add_row(["Total", "", "", "", "", "", "", "", f"{total_profit:.2f}"])
-
-        message = f"Pending Orders:\n{table}"
-    else:
-        message = "No pending orders at the moment."
-
-    update.message.reply_text(message)
+async def open_trades(update: Update, context: CallbackContext) -> None:
+    try:
+        open_trades_data = await get_open_trades()
+        table = create_table(open_trades_data, is_pending=False)
+        update.message.reply_text(f"Open Trades:\n{table}")
+    except Exception as e:
+        update.message.reply_text(f"Error getting open trades: {e}")
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
