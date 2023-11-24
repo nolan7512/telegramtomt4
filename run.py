@@ -138,6 +138,8 @@ async def get_pending_orders(update: Update):
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
+        logger.info('Waiting logger trades ...')
+        logger.info(orders)
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
