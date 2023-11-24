@@ -5,6 +5,7 @@ import math
 import os
 import re
 import json
+import time
 
 try:
     from typing import Literal
@@ -272,9 +273,11 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         # Iterate for batches of 4096
         table_parts = split_table(table, max_length=4000)
         # In các phần
-        for i, part in enumerate(table_parts):
+        for i, part in enumerate(table_parts):   
+            part_message = f'<pre>{part}</pre>'
             print(f"Part {i + 1}:\n{part}\n{'=' * 20}\n")
-            update.effective_message.reply_text(f'<pre>{part}</pre>', parse_mode=ParseMode.HTML)
+            update.effective_message.reply_text(part_message, parse_mode=ParseMode.HTML)
+            time.sleep(0.5)
     except Exception as e:
         update.effective_message.reply_text(f"Error open trades: {e}")
 
