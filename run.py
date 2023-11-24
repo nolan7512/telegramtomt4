@@ -197,7 +197,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
         # print('Create Table ---------------------------------------------')
         # print(json_data)
         table = PrettyTable()
-        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
+        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
         table.align["Id"] = "l"
         table.align["Profit"] = "Type"  
         table.align["Symbol"] = "l" 
@@ -210,14 +210,14 @@ def create_table(data, is_pending=True) -> PrettyTable:
             data_key = "positions"       
         else:
             data_key = "orders"
-            headers.remove("Profit")
+            #headers.remove("Profit")
 
         table.field_names = headers
 
         for order_or_position in json_data:
             # Truy cập thông tin từng vị thế hoặc order tùy thuộc vào loại dữ liệu
-            # print('Create Table Child ---------------------------------------------')
-            # print(order_or_position)
+            print('Create Table Child ---------------------------------------------')
+            print(order_or_position)
             if data_key == "positions":
                 order_type = order_or_position.get("type", "")
                 if order_type.startswith("POSITION_TYPE_"):
@@ -230,8 +230,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     order_or_position.get("volume", ""),
                     order_or_position.get("openPrice", ""),
                     order_or_position.get("stopLoss", ""),
-                    order_or_position.get("takeProfit", ""),
-                    order_or_position.get("profit", ""),
+                    order_or_position.get("takeProfit", "")
                 ]
             else:
                 order_type = order_or_position.get("type", "")
@@ -258,7 +257,6 @@ def create_table(data, is_pending=True) -> PrettyTable:
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
-        update.effective_message.reply_text("Received pending orders command")
         pending_orders_data = await get_pending_orders(update)
         table = create_table(pending_orders_data)
         update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
@@ -267,7 +265,6 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
 
 async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
-        update.effective_message.reply_text("Received open orders command")
         open_trades_data = await get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
         update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
