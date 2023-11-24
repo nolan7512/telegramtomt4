@@ -173,7 +173,7 @@ async def get_open_trades(update: Update):
         trades = await connection.get_positions()
         return trades
     except Exception as e:
-        print(f"Error getting open trades: {e}")
+        logger.info(f"Error getting open trades: {e}")
         update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
@@ -232,6 +232,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     order_or_position.get("takeProfit", ""),
                     order_or_position.get("profit", "")
                 ]
+                total_profit += float(order_or_position.get("profit", 0))
             else:
                 order_type = order_or_position.get("type", "")
                 if order_type.startswith("ORDER_TYPE_"):
@@ -246,11 +247,13 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     order_or_position.get("takeProfit", "")
                 ]
             table.add_row(row)
-
+        if not is_pending:
+            total_profit_row = ["TOTAL", "", "", "", "", "", "", round(total_profit, 2)]
+            table.add_row(total_profit_row)
         return table
     except Exception as e:
         # Xử lý lỗi khi có vấn đề với định dạng dữ liệu
-        print(f"Error creating table: {e}")
+        logger.info(f"Error creating table: {e}")
         return None
 
 
@@ -260,7 +263,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
         table = create_table(pending_orders_data)
         update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
     except Exception as e:
-        update.effective_message.reply_text(f"Error getting pending orders: {e}")
+        update.effective_message.reply_text(f"Error pending orders: {e}")
 
 async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
@@ -268,7 +271,7 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         table = create_table(open_trades_data, is_pending=False)
         update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
     except Exception as e:
-        update.effective_message.reply_text(f"Error getting open trades: {e}")
+        update.effective_message.reply_text(f"Error open trades: {e}")
 
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
