@@ -135,7 +135,6 @@ async def get_pending_orders(update: Update):
         # wait until terminal state synchronized to the local state
         logger.info('Waiting for SDK to synchronize to terminal state ...')
         await connection.wait_synchronized()
-        update.effective_message.reply_text("Start get orders")
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
@@ -169,7 +168,6 @@ async def get_open_trades(update: Update):
         # wait until terminal state synchronized to the local state
         logger.info('Waiting for SDK to synchronize to terminal state ...')
         await connection.wait_synchronized()
-        update.effective_message.reply_text("Start get position")
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         trades = await connection.get_positions()
@@ -195,20 +193,24 @@ def create_table(data, is_pending=True) -> PrettyTable:
         
         # print('Create Table ---------------------------------------------')
         # print(json_data)
-        table = PrettyTable()
-        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
+        table = PrettyTable()      
+        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
         table.align["Id"] = "l"
         table.align["Type"] = "1"  
         table.align["Symbol"] = "l" 
         table.align["Size"] = "l"  
         table.align["Entry"] = "l"
         table.align["SL"] = "l"  
-        table.align["TP"] = "l" 
+        table.align["TP"] = "l"
+        table.align["Profit"] = "1"  
         if not is_pending:
-            data_key = "positions"       
+            data_key = "positions" 
+            table.title = "Opening Trades"      
         else:
             data_key = "orders"
-            #headers.remove("Profit")
+            table.title = "Pending Orders"
+            if "Profit" in headers:
+                headers.remove("Profit")
 
         table.field_names = headers
 
@@ -222,12 +224,13 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     simplified_type = order_type[len("POSITION_TYPE_"):]
                 row = [
                     order_or_position.get("id", ""),
-                    order_or_position.get("type", ""),
+                    simplified_type,
                     order_or_position.get("symbol", ""),
                     order_or_position.get("volume", ""),
                     order_or_position.get("openPrice", ""),
                     order_or_position.get("stopLoss", ""),
-                    order_or_position.get("takeProfit", "")
+                    order_or_position.get("takeProfit", ""),
+                    order_or_position.get("profit", "")
                 ]
             else:
                 order_type = order_or_position.get("type", "")
@@ -235,7 +238,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     simplified_type = order_type[len("ORDER_TYPE_"):]
                 row = [
                     order_or_position.get("id", ""),
-                    order_or_position.get("type", ""),
+                    simplified_type,
                     order_or_position.get("symbol", ""),
                     order_or_position.get("volume", ""),
                     order_or_position.get("openPrice", ""),
