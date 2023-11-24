@@ -287,11 +287,12 @@ def split_table(table, max_length=4000):
     
     # Duyệt qua từng hàng trong bảng gốc
     for row in table:
-        # Tính tổng chiều dài của các giá trị trong hàng
-        row_length = sum(len(str(value)) for value in row)
+        # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
+        current_part_str = str(current_part)
+        row_length = len(current_part_str)
         
         # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-        if len(str(current_part)) + row_length > max_length:
+        if row_length + len(str(row)) > max_length:
             table_parts.append(current_part)
             current_part = PrettyTable()
             current_part.field_names = table.field_names
@@ -303,6 +304,7 @@ def split_table(table, max_length=4000):
     table_parts.append(current_part)
 
     return table_parts
+
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
 
