@@ -15,6 +15,7 @@ from metaapi_cloud_sdk import MetaApi
 from prettytable import PrettyTable
 from telegram import ParseMode, Update
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, ConversationHandler, CallbackContext
+from datetime import datetime
 
 
 # MetaAPI Credentials
@@ -182,21 +183,21 @@ async def get_open_trades(update: Update):
 
 from datetime import datetime
 
-async def create_table(data, is_pending=True):
+def create_table(data, is_pending=True):
     try:
         # Kiểm tra xem data có phải là chuỗi không
         if isinstance(data, str):
             # Nếu là chuỗi, chuyển đổi thành đối tượng Python
-            json_data = json.loads(data[2])
-        elif isinstance(data, dict):
-            # Nếu là từ điển, sử dụng trực tiếp
-            json_data = data[2]
+            json_data = json.loads(data)
+        elif isinstance(data, list):
+            # Nếu là danh sách, sử dụng trực tiếp
+            json_data = data
         else:
-            # Nếu không phải là chuỗi hoặc từ điển, xử lý lỗi hoặc trả về
+            # Nếu không phải là chuỗi hoặc danh sách, xử lý lỗi hoặc trả về
             raise ValueError("Invalid data format")
         
-        logger.info('Create Table ---------------------------------------------')
-        logger.info(json_data)
+        print('Create Table ---------------------------------------------')
+        print(json_data)
         table = PrettyTable()
         headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
         if not is_pending:
@@ -206,19 +207,30 @@ async def create_table(data, is_pending=True):
 
         table.field_names = headers
 
-        for position in json_data.get(data_key, []):
-            # Truy cập thông tin từng vị thế
-            logger.info('Create Table Child ---------------------------------------------')
-            logger.info(position)
-            row = [
-                position.get("id", ""),
-                position.get("type", ""),
-                position.get("symbol", ""),
-                position.get("volume", ""),
-                position.get("openPrice", ""),
-                position.get("stopLoss", ""),
-                position.get("takeProfit", "")
-            ]
+        for order_or_position in json_data:
+            # Truy cập thông tin từng vị thế hoặc order tùy thuộc vào loại dữ liệu
+            print('Create Table Child ---------------------------------------------')
+            print(order_or_position)
+            if data_key == "positions":
+                row = [
+                    order_or_position.get("id", ""),
+                    order_or_position.get("type", ""),
+                    order_or_position.get("symbol", ""),
+                    order_or_position.get("volume", ""),
+                    order_or_position.get("openPrice", ""),
+                    order_or_position.get("stopLoss", ""),
+                    order_or_position.get("takeProfit", "")
+                ]
+            else:
+                row = [
+                    order_or_position.get("id", ""),
+                    order_or_position.get("type", ""),
+                    order_or_position.get("symbol", ""),
+                    order_or_position.get("volume", ""),
+                    order_or_position.get("openPrice", ""),
+                    order_or_position.get("stopLoss", ""),
+                    order_or_position.get("takeProfit", "")
+                ]
             table.add_row(row)
 
         return table
@@ -226,7 +238,6 @@ async def create_table(data, is_pending=True):
         # Xử lý lỗi khi có vấn đề với định dạng dữ liệu
         print(f"Error creating table: {e}")
         return None
-
 
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
