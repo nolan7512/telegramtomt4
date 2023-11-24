@@ -292,10 +292,9 @@ def split_table(table, max_length=4000):
         row_length = len(current_part_str)
         
         # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-        if row_length + len(current_part.get_string(fields=[row])) > max_length:
+        if row_length + 150 > max_length:
             table_parts.append(current_part)
-            current_part = PrettyTable()
-            current_part.field_names = table.field_names
+            current_part.clear_rows()
 
         # Thêm hàng vào bảng hiện tại
         current_part.add_row(row)
