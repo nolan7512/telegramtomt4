@@ -139,8 +139,6 @@ async def get_pending_orders(update: Update):
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
-        logger.info('Waiting logger trades ...')
-        logger.info(orders)
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
@@ -183,7 +181,7 @@ async def get_open_trades(update: Update):
 
 from datetime import datetime
 
-def create_table(data, is_pending=True):
+def create_table(data, is_pending=True) -> PrettyTable:
     try:
         # Kiểm tra xem data có phải là chuỗi không
         if isinstance(data, str):
@@ -196,34 +194,52 @@ def create_table(data, is_pending=True):
             # Nếu không phải là chuỗi hoặc danh sách, xử lý lỗi hoặc trả về
             raise ValueError("Invalid data format")
         
-        print('Create Table ---------------------------------------------')
-        print(json_data)
+        # print('Create Table ---------------------------------------------')
+        # print(json_data)
         table = PrettyTable()
-        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
+        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
+        table.align["Id"] = "l"
+        table.align["Profit"] = "Type"  
+        table.align["Symbol"] = "l" 
+        table.align["Size"] = "l"  
+        table.align["Entry"] = "l"
+        table.align["SL"] = "l"  
+        table.align["TP"] = "l"
+        table.align["Profit"] = "l"  
         if not is_pending:
-            data_key = "orders"
+            data_key = "positions"       
         else:
-            data_key = "positions"
+            data_key = "orders"
+            headers.remove("Profit")
 
         table.field_names = headers
 
         for order_or_position in json_data:
             # Truy cập thông tin từng vị thế hoặc order tùy thuộc vào loại dữ liệu
-            print('Create Table Child ---------------------------------------------')
-            print(order_or_position)
+            # print('Create Table Child ---------------------------------------------')
+            # print(order_or_position)
             if data_key == "positions":
+                order_type = order_or_position.get("type", "")
+                if order_type.startswith("POSITION_TYPE_"):
+                    simplified_type = order_type[len("POSITION_TYPE_"):]
                 row = [
                     order_or_position.get("id", ""),
+                    simplified_type,
                     order_or_position.get("type", ""),
                     order_or_position.get("symbol", ""),
                     order_or_position.get("volume", ""),
                     order_or_position.get("openPrice", ""),
                     order_or_position.get("stopLoss", ""),
-                    order_or_position.get("takeProfit", "")
+                    order_or_position.get("takeProfit", ""),
+                    order_or_position.get("profit", ""),
                 ]
             else:
+                order_type = order_or_position.get("type", "")
+                if order_type.startswith("ORDER_TYPE_"):
+                    simplified_type = order_type[len("ORDER_TYPE_"):]
                 row = [
                     order_or_position.get("id", ""),
+                    simplified_type,
                     order_or_position.get("type", ""),
                     order_or_position.get("symbol", ""),
                     order_or_position.get("volume", ""),
@@ -245,7 +261,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
         update.effective_message.reply_text("Received pending orders command")
         pending_orders_data = await get_pending_orders(update)
         table = create_table(pending_orders_data)
-        update.effective_message.reply_text(f"Pending Trades:\n{table}")
+        update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
     except Exception as e:
         update.effective_message.reply_text(f"Error getting pending orders: {e}")
 
@@ -254,7 +270,7 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         update.effective_message.reply_text("Received open orders command")
         open_trades_data = await get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
-        update.effective_message.reply_text(f"Open Trades:\n{table}")
+        update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
     except Exception as e:
         update.effective_message.reply_text(f"Error getting open trades: {e}")
 
