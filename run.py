@@ -269,10 +269,40 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
         open_trades_data = await get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
-        update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
+        # Iterate for batches of 4096
+        table_parts = split_table(table, max_length=4000)
+        # In các phần
+        for i, part in enumerate(table_parts):
+            print(f"Part {i + 1}:\n{part}\n{'=' * 20}\n")
+            update.effective_message.reply_text(f'<pre>{part}</pre>', parse_mode=ParseMode.HTML)
     except Exception as e:
         update.effective_message.reply_text(f"Error open trades: {e}")
 
+def split_table(table, max_length=4000):
+    # Tạo danh sách chứa các phần của bảng
+    table_parts = []
+    
+    current_part = PrettyTable()
+    current_part.field_names = table.field_names
+    
+    # Duyệt qua từng hàng trong bảng gốc
+    for row in table:
+        # Tính tổng chiều dài của các giá trị trong hàng
+        row_length = sum(len(str(value)) for value in row)
+        
+        # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
+        if len(str(current_part)) + row_length > max_length:
+            table_parts.append(current_part)
+            current_part = PrettyTable()
+            current_part.field_names = table.field_names
+
+        # Thêm hàng vào bảng hiện tại
+        current_part.add_row(row)
+    
+    # Thêm bảng hiện tại vào danh sách
+    table_parts.append(current_part)
+
+    return table_parts
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
 
