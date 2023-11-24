@@ -140,7 +140,6 @@ async def get_pending_orders(update: Update):
         orders = await connection.get_orders()
         await connection.close()
         await account.undeploy()
-        update.effective_message.reply_text(orders)
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
@@ -177,7 +176,6 @@ async def get_open_trades(update: Update):
         trades = await connection.get_positions()
         await connection.close()
         await account.undeploy()
-        update.effective_message.reply_text(trades)
         return trades
     except Exception as e:
         print(f"Error getting open trades: {e}")
@@ -192,38 +190,38 @@ async def create_table(data, is_pending=True):
         # logger.info('Create Table:')
         # logger.info(parsed_data)
         # Kiểm tra xem data có phải là chuỗi không
-        # if isinstance(data, str):
-        #     # Nếu là chuỗi, chuyển đổi thành đối tượng Python
-        #     json_data = json.loads(data)
-        # elif isinstance(data, dict):
-        #     # Nếu là từ điển, sử dụng trực tiếp
-        #     json_data = data
-        # else:
-        #     # Nếu không phải là chuỗi hoặc từ điển, xử lý lỗi hoặc trả về
-        #     raise ValueError("Invalid data format")
+        if isinstance(data, str):
+            # Nếu là chuỗi, chuyển đổi thành đối tượng Python
+            json_data = json.loads(data)
+        elif isinstance(data, dict):
+            # Nếu là từ điển, sử dụng trực tiếp
+            json_data = data
+        else:
+            # Nếu không phải là chuỗi hoặc từ điển, xử lý lỗi hoặc trả về
+            raise ValueError("Invalid data format")
 
         table = PrettyTable()
-        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
+        headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
         if not is_pending:
-            headers.remove("Profit")
+            # headers.remove("Profit")
             data_key = "orders"
         else:
             data_key = "positions"
 
         table.field_names = headers
 
-        for json_str in data:
-            position_data = json.loads(json_str)
+        for json_str in json_data:
+            #position_data = json.loads(json_str)
             # Truy cập thông tin từng vị thế
             row = [
-                position_data.get("id",""),
-                position_data.get("type", ""),
-                position_data.get("symbol",""),
-                position_data.get("volume",""),
-                position_data.get("openPrice",""),
-                position_data.get("stopLoss", ""),
-                position_data.get("takeProfit", ""),
-                position_data.get("profit","") if not is_pending else None
+                json_str.get("id",""),
+                json_str.get("type", ""),
+                json_str.get("symbol",""),
+                json_str.get("volume",""),
+                json_str.get("openPrice",""),
+                json_str.get("stopLoss", ""),
+                json_str.get("takeProfit", "")
+                # json_str.get("profit","") if not is_pending else None
             ]
             table.add_row(row)
         # for position in json_data.get(data_key, []):
