@@ -199,7 +199,9 @@ async def create_table(data, is_pending=True):
         else:
             # Nếu không phải là chuỗi hoặc từ điển, xử lý lỗi hoặc trả về
             raise ValueError("Invalid data format")
-
+        
+        logger.info('Create Table ---------------------------------------------')
+        logger.info(json_data)
         table = PrettyTable()
         headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
         if not is_pending:
@@ -213,6 +215,8 @@ async def create_table(data, is_pending=True):
         for json_str in json_data:
             #position_data = json.loads(json_str)
             # Truy cập thông tin từng vị thế
+            logger.info('Create Table Child ---------------------------------------------')
+            logger.info(json_str)
             row = [
                 json_str.get("id",""),
                 json_str.get("type", ""),
