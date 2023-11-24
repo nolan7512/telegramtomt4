@@ -138,8 +138,6 @@ async def get_pending_orders(update: Update):
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
-        await connection.close()
-        await account.undeploy()
         return orders
     except Exception as e:
         print(f"Error getting pending orders: {e}")
@@ -174,8 +172,6 @@ async def get_open_trades(update: Update):
         # obtains account information from MetaTrader server
         # account_information = await connection.get_account_information()
         trades = await connection.get_positions()
-        await connection.close()
-        await account.undeploy()
         return trades
     except Exception as e:
         print(f"Error getting open trades: {e}")
