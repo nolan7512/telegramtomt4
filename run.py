@@ -244,7 +244,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
         update.effective_message.reply_text("Received pending orders command")
         pending_orders_data = await get_pending_orders(update)
-        table = await create_table(pending_orders_data)
+        table = create_table(pending_orders_data)
         update.effective_message.reply_text(f"Pending Trades:\n{table}")
     except Exception as e:
         update.effective_message.reply_text(f"Error getting pending orders: {e}")
@@ -253,7 +253,7 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
         update.effective_message.reply_text("Received open orders command")
         open_trades_data = await get_open_trades(update)
-        table = await create_table(open_trades_data, is_pending=False)
+        table = create_table(open_trades_data, is_pending=False)
         update.effective_message.reply_text(f"Open Trades:\n{table}")
     except Exception as e:
         update.effective_message.reply_text(f"Error getting open trades: {e}")
