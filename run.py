@@ -179,7 +179,6 @@ async def get_open_trades(update: Update):
         update.effective_message.reply_text(f"Error getting open trades: {e}")
         return []
 
-from datetime import datetime
 
 def create_table(data, is_pending=True) -> PrettyTable:
     try:
@@ -199,13 +198,12 @@ def create_table(data, is_pending=True) -> PrettyTable:
         table = PrettyTable()
         headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP"]
         table.align["Id"] = "l"
-        table.align["Profit"] = "Type"  
+        table.align["Type"] = "1"  
         table.align["Symbol"] = "l" 
         table.align["Size"] = "l"  
         table.align["Entry"] = "l"
         table.align["SL"] = "l"  
-        table.align["TP"] = "l"
-        table.align["Profit"] = "l"  
+        table.align["TP"] = "l" 
         if not is_pending:
             data_key = "positions"       
         else:
@@ -224,7 +222,6 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     simplified_type = order_type[len("POSITION_TYPE_"):]
                 row = [
                     order_or_position.get("id", ""),
-                    simplified_type,
                     order_or_position.get("type", ""),
                     order_or_position.get("symbol", ""),
                     order_or_position.get("volume", ""),
@@ -238,7 +235,6 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     simplified_type = order_type[len("ORDER_TYPE_"):]
                 row = [
                     order_or_position.get("id", ""),
-                    simplified_type,
                     order_or_position.get("type", ""),
                     order_or_position.get("symbol", ""),
                     order_or_position.get("volume", ""),
