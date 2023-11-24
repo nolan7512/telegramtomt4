@@ -288,11 +288,11 @@ def split_table(table, max_length=4000):
     # Duyệt qua từng hàng trong bảng gốc
     for row in table:
         # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
-        current_part_str = str(current_part)
+        current_part_str = current_part.get_string()
         row_length = len(current_part_str)
         
         # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-        if row_length + len(str(row)) > max_length:
+        if row_length + len(current_part.get_string(fields=[row])) > max_length:
             table_parts.append(current_part)
             current_part = PrettyTable()
             current_part.field_names = table.field_names
