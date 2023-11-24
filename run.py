@@ -187,13 +187,16 @@ from datetime import datetime
 
 async def create_table(data, is_pending=True):
     try:
+        parsed_data = data[2]
+        logger.info('Create Table:')
+        logger.info(parsed_data)
         # Kiểm tra xem data có phải là chuỗi không
         if isinstance(data, str):
             # Nếu là chuỗi, chuyển đổi thành đối tượng Python
-            json_data = json.loads(data)
+            json_data = json.loads(parsed_data)
         elif isinstance(data, dict):
             # Nếu là từ điển, sử dụng trực tiếp
-            json_data = data
+            json_data = parsed_data
         else:
             # Nếu không phải là chuỗi hoặc từ điển, xử lý lỗi hoặc trả về
             raise ValueError("Invalid data format")
@@ -202,10 +205,10 @@ async def create_table(data, is_pending=True):
         headers = ["Id", "Time", "Type", "Symbol", "Size", "Entry", "SL", "TP", "Profit"]
         if not is_pending:
             headers.remove("Profit")
+            data_key = "orders"
+        else:
+            data_key = "positions"
         table.field_names = headers
-
-        # Lựa chọn key dựa trên loại dữ liệu (positions hoặc orders)
-        data_key = "positions" if "positions" in json_data else "orders"
 
         for position in json_data.get(data_key, []):
             # Chuyển đổi các đối tượng datetime thành chuỗi trước khi thêm vào table
