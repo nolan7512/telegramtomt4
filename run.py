@@ -213,7 +213,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
                 headers.remove("Profit")
 
         table.field_names = headers
-
+        total_profit = 0
         for order_or_position in json_data:
             # Truy cập thông tin từng vị thế hoặc order tùy thuộc vào loại dữ liệu
             print('Create Table Child ---------------------------------------------')
