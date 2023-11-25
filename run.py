@@ -265,9 +265,20 @@ def create_table(data, is_pending=True) -> PrettyTable:
 
 async def pending_orders(update: Update, context: CallbackContext) -> None:
     try:
+        countrow = 0
         pending_orders_data = await get_pending_orders(update)
         table = create_table(pending_orders_data)
-        update.effective_message.reply_text(f'<pre>{table}</pre>', parse_mode=ParseMode.HTML)
+        for i, row in enumerate(table.rows):
+            countrow = countrow + 1
+        update.effective_message.reply_text(f"Total Pending Orders: {countrow}")
+        batch_size = 30
+        # In các phần
+        for start in range(0, countrow, batch_size):
+            end = min(start + batch_size, countrow)
+            temp_table = table.get_string(start=start, end=end)
+            part_temp_table = f'<pre>{temp_table}</pre>'
+            update.effective_message.reply_text(part_temp_table, parse_mode=ParseMode.HTML)
+            await asyncio.sleep(0.3)  # Đợi 0.5 giây giữa các phần để tránh vấn đề về chiều dài tin nhắn
     except Exception as e:
         update.effective_message.reply_text(f"Error pending orders: {e}")
 
@@ -276,59 +287,19 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         countrow = 0
         open_trades_data = await get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
-        # Iterate for batches of 4096
-        #table_parts = split_table(table, max_length=3500)
         for i, row in enumerate(table.rows):
             countrow = countrow + 1
-        update.effective_message.reply_text(f"CountRow: {countrow}")
-
-        temp_table = table.get_string(strat=1, end = 10)
-        part_temp_table = f'<pre>{temp_table}</pre>'
-        update.effective_message.reply_text(part_temp_table, parse_mode=ParseMode.HTML)
+        update.effective_message.reply_text(f"Total Positions: {countrow}")
+        batch_size = 30
         # In các phần
-        for i, part in enumerate(table_parts):   
-            part_message = f'<pre>{part}</pre>'
-            print(f"Part {i + 1}:\n{part}\n{'=' * 20}\n")
-            update.effective_message.reply_text(part_message, parse_mode=ParseMode.HTML)
-            time.sleep(0.5)
+        for start in range(0, countrow, batch_size):
+            end = min(start + batch_size, countrow)
+            temp_table = table.get_string(start=start, end=end)
+            part_temp_table = f'<pre>{temp_table}</pre>'
+            update.effective_message.reply_text(part_temp_table, parse_mode=ParseMode.HTML)
+            await asyncio.sleep(0.3)  # Đợi 0.5 giây giữa các phần để tránh vấn đề về chiều dài tin nhắn
     except Exception as e:
         update.effective_message.reply_text(f"Error open trades: {e}")
-
-def split_table(table, max_length=3500):
-    # Tạo danh sách chứa các phần của bảng
-    try:
-
-        table_parts = []
-        
-        current_part = PrettyTable()
-        current_part.field_names = table.field_names
-        a = 200
-        # Duyệt qua từng hàng trong bảng gốc
-        for row in table:
-            # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
-            mystring = current_part.get_string()
-            current_part_str = str(mystring)
-            logger.info(f"For 1 ------------------------------------: {current_part_str}")
-            estimated_length = len(current_part_str)
-            logger.info(f"For 2 ------------------------------------: {estimated_length}")
-
-            #estimated_length = len(temp_part)
-            
-            # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-            if estimated_length > max_length:
-                table_parts.append(current_part)
-                current_part.clear_rows()
-                logger.info(f"For 4 ------------------------------------: {table_parts}")
-
-            # Thêm hàng vào bảng hiện tại
-            current_part.add_row(row)
-        
-        # Thêm bảng hiện tại vào danh sách
-        table_parts.append(current_part)
-        logger.info(f"For 5 ------------------------------------: {table_parts}")
-        return table_parts
-    except Exception as e:
-        logger.info(f"Error split_table: {e}")
 
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
