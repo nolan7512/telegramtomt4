@@ -288,30 +288,34 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
 
 def split_table(table, max_length=3500):
     # Tạo danh sách chứa các phần của bảng
-    table_parts = []
-    
-    current_part = PrettyTable()
-    current_part.field_names = table.field_names
-    
-    # Duyệt qua từng hàng trong bảng gốc
-    for row in table:
-        # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
-        current_part_str = str(current_part) + str(row)
-        estimated_length = sys.getsizeof(current_part_str)
-        #estimated_length = len(temp_part)
+    try:
+
+        table_parts = []
         
-        # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-        if estimated_length  > max_length:
-            table_parts.append(current_part)
-            current_part.clear_rows()
+        current_part = PrettyTable()
+        current_part.field_names = table.field_names
+        
+        # Duyệt qua từng hàng trong bảng gốc
+        for row in table:
+            # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
+            #current_part_str = str(current_part) + str(row)
+            estimated_length = sys.getsizeof(current_part)
+            #estimated_length = len(temp_part)
+            
+            # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
+            if estimated_length  > max_length:
+                table_parts.append(current_part)
+                current_part.clear_rows()
 
-        # Thêm hàng vào bảng hiện tại
-        current_part.add_row(row)
-    
-    # Thêm bảng hiện tại vào danh sách
-    table_parts.append(current_part)
+            # Thêm hàng vào bảng hiện tại
+            current_part.add_row(row)
+        
+        # Thêm bảng hiện tại vào danh sách
+        table_parts.append(current_part)
 
-    return table_parts
+        return table_parts
+    except Exception as e:
+        logger.info(f"Error split_table: {e}")
 
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
