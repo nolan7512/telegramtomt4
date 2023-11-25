@@ -1014,16 +1014,18 @@ def CheckSignalMessage(signal:str)-> int:
     for elemental in SYMBOLSPLUS:
         calcusymbol = signal[0].upper().find(elemental,0)
         for symbolother in TYPETRADE:
-            calcusymbolother = signal.upper().find(symbolother,0)
-            if(calcusymbol != -1 & calcusymbolother != -1) :          
-                return TRADE   
+            for item in signal:
+                calcusymbolother = item.upper().find(symbolother,0)
+                if(calcusymbol != -1 & calcusymbolother != -1) :          
+                    return TRADE   
    # extracts symbol from trade signal                      
     for element in SYMBOLS:
         calcu = signal[0].upper().find(element,0)
         for symbol_other in TYPETRADE:
-            calcu_symbolother = signal.upper().find(symbol_other,0)
-            if(calcu != -1 & calcu_symbolother != -1) :          
-                return TRADE
+            for item in signal:
+                calcu_symbolother = item.upper().find(symbol_other,0)
+                if(calcu != -1 & calcu_symbolother != -1) :          
+                    return TRADE
     return ERROR
     
 
