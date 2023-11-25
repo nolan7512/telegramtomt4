@@ -291,7 +291,7 @@ def split_table(table, max_length=4000):
     # Duyệt qua từng hàng trong bảng gốc
     for row in table:
         # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
-        current_part_str = str(current_part)
+        current_part_str = str(current_part) + str(row)
         row_length = len(current_part_str)
         
         # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
