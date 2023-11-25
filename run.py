@@ -268,8 +268,7 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
         countrow = 0
         pending_orders_data = await get_pending_orders(update)
         table = create_table(pending_orders_data)
-        for i, row in enumerate(table.rows):
-            countrow = countrow + 1
+        countrow = len(table._rows)
         update.effective_message.reply_text(f"Total Pending Orders: {countrow}")
         batch_size = 30
         # In các phần
@@ -287,8 +286,7 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         countrow = 0
         open_trades_data = await get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
-        for i, row in enumerate(table.rows):
-            countrow = countrow + 1
+        countrow = len(table._rows)
         update.effective_message.reply_text(f"Total Positions: {countrow}")
         batch_size = 30
         # In các phần
