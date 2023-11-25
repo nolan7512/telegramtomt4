@@ -307,16 +307,17 @@ def split_table(table, max_length=3500):
             #estimated_length = len(temp_part)
             
             # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-            if estimated_length + a > max_length:
+            if estimated_length > max_length:
                 table_parts.append(current_part)
                 current_part.clear_rows()
+                logger.info(f"For 4 ------------------------------------: {table_parts}")
 
             # Thêm hàng vào bảng hiện tại
             current_part.add_row(row)
         
         # Thêm bảng hiện tại vào danh sách
         table_parts.append(current_part)
-
+        logger.info(f"For 5 ------------------------------------: {table_parts}")
         return table_parts
     except Exception as e:
         logger.info(f"Error split_table: {e}")
