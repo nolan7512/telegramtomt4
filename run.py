@@ -277,8 +277,6 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         table = create_table(open_trades_data, is_pending=False)
         # Iterate for batches of 4096
         table_parts = split_table(table, max_length=3500)
-        temp_len = len(str(table_parts))
-        update.effective_message.reply_text(f"Error pending orders: {temp_len}")
         # In các phần
         for i, part in enumerate(table_parts):   
             part_message = f'<pre>{part}</pre>'
@@ -300,8 +298,11 @@ def split_table(table, max_length=3500):
         # Duyệt qua từng hàng trong bảng gốc
         for row in table:
             # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
-            current_part_str = str(current_part)
+            mystring = current_part.get_string()
+            current_part_str = str(mystring)
+            logger.info(f"For 1 ------------------------------------: {current_part_str}")
             estimated_length = len(current_part_str)
+            logger.info(f"For 2 ------------------------------------: {estimated_length}")
 
             #estimated_length = len(temp_part)
             
