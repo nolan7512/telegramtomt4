@@ -277,6 +277,8 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         table = create_table(open_trades_data, is_pending=False)
         # Iterate for batches of 4096
         table_parts = split_table(table, max_length=3500)
+        temp_len = len(str(table_parts))
+        update.effective_message.reply_text(f"Error pending orders: {temp_len}")
         # In các phần
         for i, part in enumerate(table_parts):   
             part_message = f'<pre>{part}</pre>'
