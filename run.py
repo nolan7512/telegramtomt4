@@ -298,12 +298,12 @@ def split_table(table, max_length=3500):
         # Duyệt qua từng hàng trong bảng gốc
         for row in table:
             # Tính tổng chiều dài của chuỗi đại diện cho bảng hiện tại
-            #current_part_str = str(current_part) + str(row)
-            estimated_length = sys.getsizeof(current_part)
+            current_part_str = str(current_part)
+            estimated_length = sys.getsizeof(current_part_str)
             #estimated_length = len(temp_part)
             
             # Nếu thêm hàng mới làm vượt quá ngưỡng, thì thêm bảng hiện tại vào danh sách và tạo bảng mới
-            if estimated_length  > max_length:
+            if estimated_length + 150 > max_length:
                 table_parts.append(current_part)
                 current_part.clear_rows()
 
