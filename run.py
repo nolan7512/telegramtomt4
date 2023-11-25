@@ -273,10 +273,17 @@ async def pending_orders(update: Update, context: CallbackContext) -> None:
 
 async def open_trades(update: Update, context: CallbackContext) -> None:
     try:
+        countrow = 0
         open_trades_data = await get_open_trades(update)
         table = create_table(open_trades_data, is_pending=False)
         # Iterate for batches of 4096
-        table_parts = split_table(table, max_length=3500)
+        #table_parts = split_table(table, max_length=3500)
+        for i, row in enumerate(table.rows):
+            countrow = countrow + 1
+        update.effective_message.reply_text(f"CountRow: {countrow}")
+        temp_table = table.get_string(strat=1, end = 10)
+        part_temp_table = f'<pre>{part}</pre>'
+        update.effective_message.reply_text(part_temp_table, parse_mode=ParseMode.HTML)
         # In các phần
         for i, part in enumerate(table_parts):   
             part_message = f'<pre>{part}</pre>'
