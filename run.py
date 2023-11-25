@@ -26,7 +26,8 @@ ACCOUNT_ID = os.environ.get("ACCOUNT_ID")
 
 # Telegram Credentials
 TOKEN = os.environ.get("TOKEN")
-TELEGRAM_USER = os.environ.get("TELEGRAM_USER")
+TELEGRAM_USER = os.environ.get("TELEGRAM_USER", "")  # Đọc biến môi trường TELEGRAM_USERS, mặc định là chuỗi trống
+AUTHORIZED_USERS = TELEGRAM_USER.split(",")  # Chia chuỗi thành danh sách, sử dụng dấu phẩy làm dấu phân cách
 CHANNEL_USER = os.environ.get("CHANNEL_USER")
 
 # Heroku Credentials
@@ -37,7 +38,11 @@ PORT = int(os.environ.get('PORT', '8443'))
 
 PLAN = os.environ.get('PLAN','A')
 
+TRAILINGSTOP = os.environ.get('TRAILING_STOP','Y')
 
+# RISK FACTOR
+RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
+RISK_PERTRADE = float(os.environ.get("RISK_PERTRADE"))
 
 # Enables logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -50,11 +55,9 @@ CALCULATE, TRADE, DECISION, ERROR = range(4)
 SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD','GOLD']
 SYMBOLSPLUS = ['AUD/CAD', 'AUD/CHF', 'AUD/JPY', 'AUD/NZD', 'AUD/USD', 'CAD/CHF', 'CAD/JPY', 'CHF/JPY', 'EUR/AUD', 'EUR/CAD', 'EUR/CHF', 'EUR/GBP', 'EUR/JPY', 'EUR/NZD', 'EUR/USD', 'GBP/AUD', 'GBP/CAD', 'GBP/CHF', 'GBP/JPY', 'GBP/NZD', 'GBP/USD', 'NZD/CAD', 'NZD/CHF', 'NZD/JPY', 'NZD/USD', 'USD/CAD', 'USD/CHF', 'USD/JPY', 'XAG/USD', 'XAU/USD','GOLD']
 TYPETRADE = ['BUY','BUY LIMIT','BUY NOW','SELL','SELL LIMIT','SELL NOW']
-OTHER = ['@','Entry','TP','SL','STOP LOSS','TAKE PROFIT','TARGET PROFIT']
+OTHER = ['@','Entry','TP','SL','STOP LOSS','TAKE PROFIT','TARGET PROFIT','BUY','BUY LIMIT','BUY NOW','SELL','SELL LIMIT','SELL NOW']
 
-# RISK FACTOR
-RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
-RISK_PERTRADE = float(os.environ.get("RISK_PERTRADE"))
+
 
 # Helper Functions
 def CheckSymbolArray(stringcheck,array)-> int:
@@ -134,11 +137,7 @@ async def get_pending_orders(update: Update):
         connection = account.get_rpc_connection()
         await connection.connect()
 
-        # wait until terminal state synchronized to the local state
-        logger.info('Waiting for SDK to synchronize to terminal state ...')
-        await connection.wait_synchronized()
         # obtains account information from MetaTrader server
-        # account_information = await connection.get_account_information()
         orders = await connection.get_orders()
         return orders
     except Exception as e:
@@ -168,10 +167,8 @@ async def get_open_trades(update: Update):
         await connection.connect()
 
         # wait until terminal state synchronized to the local state
-        logger.info('Waiting for SDK to synchronize to terminal state ...')
-        await connection.wait_synchronized()
+
         # obtains account information from MetaTrader server
-        # account_information = await connection.get_account_information()
         trades = await connection.get_positions()
         return trades
     except Exception as e:
@@ -303,6 +300,10 @@ def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
 
 def handle_open_trades(update: Update, context: CallbackContext):
+    asyncio.run(open_trades(update,context))
+def handle_trailingstop(update: Update, context: CallbackContext):
+    asyncio.run(open_trades(update,context))
+def handle_closeposition(update: Update, context: CallbackContext):
     asyncio.run(open_trades(update,context))
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
@@ -879,9 +880,10 @@ def unknown_command(update: Update, context: CallbackContext) -> None:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    if(not(update.effective_message.chat.username == TELEGRAM_USER)and not(update.effective_message.chat.username == CHANNEL_USER)):
+    user_username = update.effective_message.chat.username
+    if user_username not in AUTHORIZED_USERS:
         update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
-        return
+        return ConversationHandler.END
 
     update.effective_message.reply_text("Unknown command. Use /trade to place a trade or /calculate to find information for a trade. You can also use the /help command to view instructions for this bot.")
 
@@ -961,7 +963,8 @@ def Trade_Command(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    if(not(update.effective_message.chat.username == TELEGRAM_USER)and not(update.effective_message.chat.username == CHANNEL_USER)):
+    user_username = update.effective_message.chat.username
+    if user_username not in AUTHORIZED_USERS:
         update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
         return ConversationHandler.END
     
@@ -981,7 +984,8 @@ def Calculation_Command(update: Update, context: CallbackContext) -> int:
         update: update from Telegram
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
-    if(not(update.effective_message.chat.username == TELEGRAM_USER)and not(update.effective_message.chat.username == CHANNEL_USER)):
+    user_username = update.effective_message.chat.username
+    if user_username not in AUTHORIZED_USERS:
         update.effective_message.reply_text("You are not authorized to use this bot! 🙅🏽‍♂️")
         return ConversationHandler.END
 
@@ -1009,13 +1013,17 @@ def CheckSignalMessage(signal:str)-> int:
     # extracts symbolplus '/' from trade signal if found then replace '/' to ''
     for elemental in SYMBOLSPLUS:
         calcusymbol = signal[0].upper().find(elemental,0)
-        if(calcusymbol != -1):          
-            return TRADE   
+        for symbolother in TYPETRADE:
+            calcusymbolother = signal.upper().find(symbolother,0)
+            if(calcusymbol != -1 & calcusymbolother != -1) :          
+                return TRADE   
    # extracts symbol from trade signal                      
     for element in SYMBOLS:
         calcu = signal[0].upper().find(element,0)
-        if(calcu != -1):
-            return TRADE
+        for symbol_other in TYPETRADE:
+            calcu_symbolother = signal.upper().find(symbol_other,0)
+            if(calcu != -1 & calcu_symbolother != -1) :          
+                return TRADE
     return ERROR
     
 
@@ -1051,6 +1059,8 @@ def main() -> None:
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('pendingorders'), handle_pending_orders))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('opentrades'), handle_open_trades))
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('trailingstop'),handle_trailingstop ))
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('closeposition'),handle_closeposition ))
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
