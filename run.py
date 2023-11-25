@@ -281,8 +281,9 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
         for i, row in enumerate(table.rows):
             countrow = countrow + 1
         update.effective_message.reply_text(f"CountRow: {countrow}")
+
         temp_table = table.get_string(strat=1, end = 10)
-        part_temp_table = f'<pre>{part}</pre>'
+        part_temp_table = f'<pre>{temp_table}</pre>'
         update.effective_message.reply_text(part_temp_table, parse_mode=ParseMode.HTML)
         # In các phần
         for i, part in enumerate(table_parts):   
