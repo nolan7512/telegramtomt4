@@ -223,7 +223,9 @@ def create_table(data, is_pending=True) -> PrettyTable:
             if data_key == "positions":
                 order_type = order_or_position.get("type", "")
                 if order_type.startswith("POSITION_TYPE_"):
-                    simplified_type = order_type[len("POSITION_TYPE_"):]
+                    match = re.match(r"POSITION_TYPE_(.*)", order_type)
+                    if match:
+                        simplified_type = match.group(1)            
                 row = [
                     order_or_position.get("id", ""),
                     simplified_type,
@@ -238,7 +240,9 @@ def create_table(data, is_pending=True) -> PrettyTable:
             else:
                 order_type = order_or_position.get("type", "")
                 if order_type.startswith("ORDER_TYPE_"):
-                    simplified_type = order_type[len("ORDER_TYPE_"):]
+                    match = re.match(r"ORDER_TYPE_(.*)", order_type)
+                    if match:
+                        simplified_type = match.group(1)                              
                 row = [
                     order_or_position.get("id", ""),
                     simplified_type,
