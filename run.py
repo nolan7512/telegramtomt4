@@ -295,7 +295,7 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
 async def trailing_stop(update: Update, args) -> None:
     # Get the string of position IDs from the command arguments
     if not args:
-        update.message.reply_text("Please provide a list of position IDs.")
+        update.effective_message.reply_text("Please provide a list of position IDs.")
         return
 
     # Combine the arguments into a single string, then split it into a list of position IDs
@@ -481,7 +481,7 @@ async def account_info(update: Update) -> None:
             table.add_row([field_name_vietnamese  , field_value])
         # Gửi bảng dưới dạng tin nhắn HTML
         temp_table = f'<pre>{table}</pre>'
-        update.message.reply_text(f'<pre>{temp_table}</pre>', parse_mode=ParseMode.HTML)
+        update.effective_message.reply_text(f'<pre>{temp_table}</pre>', parse_mode=ParseMode.HTML)
     except Exception as e:
         update.effective_message.reply_text(f"Error get Account Infomation: {str(e)}.")
     
