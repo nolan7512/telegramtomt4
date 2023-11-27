@@ -119,7 +119,6 @@ def remove_pips(signal):
 # Lấy danh sách pending orders
 async def get_pending_orders(update: Update):
     try:
-        update.effective_message.reply_text("Start get pending orders")
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
         initial_state = account.state
@@ -148,7 +147,6 @@ async def get_pending_orders(update: Update):
 # Lấy danh sách open trades
 async def get_open_trades(update: Update):
     try:
-        update.effective_message.reply_text("Start get open orders")
         api = MetaApi(API_KEY)
         account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
         initial_state = account.state
@@ -349,6 +347,7 @@ async def trailing_stop(update: Update, context: CallbackContext) -> None:
 # Function to handle the /trailingstop command
 async def close_position(update: Update, context: CallbackContext) -> None:
     # Get the string of position IDs from the command arguments
+    update.effective_message.reply_text("close_position function")
     args = context.args
     if not args:
         update.effective_message.reply_text("Please provide a list of position IDs.")
