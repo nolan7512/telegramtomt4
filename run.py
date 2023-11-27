@@ -326,16 +326,14 @@ async def trailing_stop(update: Update, args) -> None:
 
             # Get position information
             position = await connection.get_position(intposition_id)
-            update.effective_message.reply_text(f"Get Position ({intposition_id}) infomation : {position}")
-
             # Modify the position with trailing stop parameters
             await connection.modify_position(
                 intposition_id,
                 stopLoss= position['openPrice'],  # Set stopLoss to the openPrice
-                takeProfit=position.takeProfit  # Keep takeProfit unchanged
+                takeProfit= position['takeProfit'] # Keep takeProfit unchanged
             )
 
-            update.effective_message.reply_text(f"Trailing stop set for position ID {intposition_id} - Change SL :{position.stopLoss} to Entry:{position.openPrice}. Successfully")
+            update.effective_message.reply_text(f"Trailing stop set for position ID ({intposition_id}) - Change SL :{position.stopLoss} to Entry:{position.openPrice}. Successfully")
 
         except ValueError:
             update.effective_message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
@@ -468,18 +466,20 @@ async def account_info(update: Update) -> None:
         for field in fields_to_display:
             # Chuyển đổi tên trường thành tiếng Việt
             field_name_vietnamese = {
-                'balance': 'Số dư',
-                'equity': 'Tài sản ròng',
-                'margin': 'Tiền ký quỹ',
-                'freeMargin': 'Số dư margin',
-                'leverage': 'Đòn bẩy',
-                'marginLevel': '% ký quỹ'
+                'balance': 'Balance - Số dư',
+                'equity': 'Equity - Tài sản ròng',
+                'margin': 'Margin - Tiền ký quỹ',
+                'freeMargin': 'FreeMargin - Số dư margin',
+                'leverage': 'Leverage - Đòn bẩy',
+                'marginLevel': 'Margin Level - % ký quỹ'
             }.get(field, field)
             if field in ['balance', 'equity', 'margin', 'freeMargin']:
                 field_value = '$ {:,.2f}'.format(account_information.get(field, 0))
-            elif field == 'margin':
+            elif field == 'marginLevel':
                 field_value = '{:.2f} %'.format(account_information.get(field, 0))
-            table.add_row([field + ' - ' + field_name_vietnamese  , field_value])
+            else:
+                field_value = account_information.get(field, 0)
+            table.add_row([field_name_vietnamese  , field_value])
         # Gửi bảng dưới dạng tin nhắn HTML
         temp_table = f'<pre>{table}</pre>'
         update.message.reply_text(f'<pre>{temp_table}</pre>', parse_mode=ParseMode.HTML)
