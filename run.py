@@ -351,8 +351,6 @@ async def close_position(update: Update, context: CallbackContext) -> None:
     args = context.args
     command_str = "".join(map(str, args))
     update.effective_message.reply_text(f"List signal str: {command_str}.")
-    update.effective_message.reply_text(f"List args[0] str: {args[0]}.")
-    update.effective_message.reply_text(f"List args[1] str: {args[1]}.")
     if not args:
         update.effective_message.reply_text("Please provide a list of position IDs.")
         return
@@ -396,8 +394,6 @@ async def close_position_partially(update: Update, context: CallbackContext) -> 
     args = context.args
     command_str = "".join(map(str, args))
     update.effective_message.reply_text(f"List signal str: {command_str}.")
-    update.effective_message.reply_text(f"List args[0] str: {args[0]}.")
-    update.effective_message.reply_text(f"List args[1] str: {args[1]}.")
     if not args or '|' not in args:
         update.effective_message.reply_text("Please provide a list of position IDs and sizes separated by '|'.")
         return
@@ -442,9 +438,6 @@ async def close_position_partially(update: Update, context: CallbackContext) -> 
             await connection.close_position_partially(intposition_id, size)
 
             update.effective_message.reply_text(f"Closed a part : {size} lot of Position ID {intposition_id} successfully.")
-
-        except ValueError:
-            update.effective_message.reply_text(f"Invalid position ID: {position_id}. Please provide valid integers.")
         except Exception as e:
             update.effective_message.reply_text(f"Error closing part of Position ID {position_id}: {str(e)}.")
 
