@@ -334,13 +334,23 @@ async def trailing_stop(update: Update, args) -> None:
             # Get position information
             position = await connection.get_position(intposition_id)
             # Modify the position with trailing stop parameters
+            if position['takeProfit']:
+                takeProfit = position['takeProfit']
+            else:
+                takeProfit = None
+
+            if position['stopLoss']:
+                stopLoss = position['stopLoss']
+            else:
+                stopLoss = None
+                
             await connection.modify_position(
                 intposition_id,
                 stop_loss = position['openPrice'], # Set stopLoss to the openPrice
-                take_profit = position['takeProfit']          
+                take_profit = takeProfit        
             )
 
-            update.effective_message.reply_text(f"Trailing stop set for position ID ({intposition_id}) - Change SL :{position['stopLoss']} to Entry:{position['openPrice']}. Successfully")
+            update.effective_message.reply_text(f"Trailing stop set for position ID ({intposition_id}) - Change SL :{stopLoss} to Entry:{position['openPrice']}. Successfully")
 
         except ValueError:
             update.effective_message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
@@ -1131,7 +1141,7 @@ def help(update: Update, context: CallbackContext) -> None:
     # market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nSL 1.14336\nTP 1.28930\nTP 1.29845\n\n"
     # limit_example = "Limit Execution:\nBUY LIMIT GBPUSD\nEntry 1.14480\nSL 1.14336\nTP 1.28930\n\n"
     # note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP1 while the other uses TP2.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
-    commandtrade = "\n----Bot commands:\n/accountinfo : Check infomation account\n /opentrades : Check all Opening Position\n/pendingorders : Check all Pending Orders\ncloseposition id,id,id \nclosepart id,id|size,size \ntrailingstop id,id,id"
+    commandtrade = "\n----Bot commands:\n\t/accountinfo : Check infomation account\n\t/opentrades : Check all Opening Position\n\t/pendingorders : Check all Pending Orders\n\tcloseposition id,id,id \n\tclosepart id,id|size,size \n\ttrailingstop id,id,id"
     # sends messages to user
     update.effective_message.reply_text(help_message + commandtrade)
     #update.effective_message.reply_text(commands)
