@@ -390,7 +390,12 @@ async def close_position(update: Update, context: CallbackContext) -> None:
 async def close_position_partially(update: Update, context: CallbackContext) -> None:
    # Get the string of position IDs and sizes from the command arguments
     args = context.args
-    if not args or '|' not in args[0]:
+    command_str = "".join(map(str, args))
+    update.effective_message.reply_text(f"List signal str: {command_str}.")
+    update.effective_message.reply_text(f"List args[0] str: {args[0]}.")
+    update.effective_message.reply_text(f"List args[1] str: {args[1]}.")
+    update.effective_message.reply_text
+    if not args or '|' not in args:
         update.effective_message.reply_text("Please provide a list of position IDs and sizes separated by '|'.")
         return
 
