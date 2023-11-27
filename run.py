@@ -252,8 +252,6 @@ def create_table(data, is_pending=True) -> PrettyTable:
                 # Sort the table by the "Profit" column in descending order
 
         if not is_pending:
-            table.sortby = "Profit"
-            table.reversesort = True
             total_profit_row = ["TOTAL PROFIT", "", "", "", "", "", "", f"{round(total_profit, 2)} $"]
             table.add_row(total_profit_row)
         return table
@@ -338,7 +336,8 @@ async def trailing_stop(update: Update, args) -> None:
             # Modify the position with trailing stop parameters
             await connection.modify_position(
                 intposition_id,
-                stop_loss = position['openPrice'] # Set stopLoss to the openPrice          
+                stop_loss = position['openPrice'], # Set stopLoss to the openPrice
+                take_profit = position['takeProfit']          
             )
 
             update.effective_message.reply_text(f"Trailing stop set for position ID ({intposition_id}) - Change SL :{position.stopLoss} to Entry:{position.openPrice}. Successfully")
