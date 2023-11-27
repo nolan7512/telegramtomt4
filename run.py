@@ -296,9 +296,8 @@ async def open_trades(update: Update, context: CallbackContext) -> None:
 
 
 # Function to handle the /trailingstop command
-async def trailing_stop(update: Update, context: CallbackContext) -> None:
+async def trailing_stop(update: Update, args) -> None:
     # Get the string of position IDs from the command arguments
-    args = context.args
     if not args:
         update.message.reply_text("Please provide a list of position IDs.")
         return
@@ -391,10 +390,9 @@ async def close_position(update: Update, args) -> None:
 
 
 
-async def close_position_partially(update: Update, context: CallbackContext) -> None:
+async def close_position_partially(update: Update, args) -> None:
    # Get the string of position IDs and sizes from the command arguments
     update.effective_message.reply_text("close_position_partially function")
-    args = context.args
     if not args or '|' not in args[0]:
         update.effective_message.reply_text("Please provide a list of position IDs and sizes separated by '|'.")
         return
@@ -448,15 +446,16 @@ def handle_open_trades(update: Update, context: CallbackContext):
     asyncio.run(open_trades(update,context))
 
 def handle_trailingstop(update: Update, context: CallbackContext):
-    args = context.args
+    args = update.message.text.split(' ')[1:]
     asyncio.run(trailing_stop(update,args))
 
 def handle_closeposition(update: Update, context: CallbackContext):
+    args = update.message.text.split(' ')[1:]
     args = context.args
     asyncio.run(close_position(update, args))
 
 def handle_close_position_part(update: Update, context: CallbackContext):
-    args = context.args
+    args = update.message.text.split(' ')[1:]
     asyncio.run(close_position_partially(update, args))
 
 
