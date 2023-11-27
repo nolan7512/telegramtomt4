@@ -452,10 +452,10 @@ def handle_trailingstop(update: Update, context: CallbackContext):
     asyncio.run(trailing_stop(update,context))
 
 def handle_closeposition(update: Update, context: CallbackContext):
-    asyncio.run(close_position(update,context))
+    asyncio.create_task(close_position(update, context))
 
 def handle_close_position_part(update: Update, context: CallbackContext):
-    asyncio.run(close_position_partially(update, context))
+    asyncio.create_task(close_position_partially(update, context))
 
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
