@@ -194,10 +194,10 @@ def create_table(data, is_pending=True) -> PrettyTable:
         table.align["Type"] = "1"  
         table.align["Symbol"] = "l" 
         table.align["Size"] = "l"  
-        table.align["Entry"] = "l"
-        table.align["SL"] = "l"  
-        table.align["TP"] = "l"
-        table.align["Profit"] = "1"  
+        table.align["Entry"] = "c"
+        table.align["SL"] = "c"  
+        table.align["TP"] = "c"
+        table.align["Profit"] = "c"  
         if not is_pending:
             data_key = "positions" 
             table.title = "Opening Trades"      
@@ -213,6 +213,11 @@ def create_table(data, is_pending=True) -> PrettyTable:
             # Truy cập thông tin từng vị thế hoặc order tùy thuộc vào loại dữ liệu
             if data_key == "positions":
                 order_type = order_or_position.get("type", "")
+                profit_value = round(float(order_or_position.get("profit", 0)), 2)
+                if profit_value >= 0:
+                    profit_with_currency = f"{profit_value:,.2f} $"
+                else:
+                    profit_with_currency = f"{profit_value:,.2f} $"
                 if order_type.startswith("POSITION_TYPE_"):
                     match = re.match(r"POSITION_TYPE_(.*)", order_type)
                     if match:
@@ -225,7 +230,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     order_or_position.get("openPrice", ""),
                     order_or_position.get("stopLoss", ""),
                     order_or_position.get("takeProfit", ""),
-                    order_or_position.get("profit", "")
+                    profit_with_currency
                 ]
                 total_profit += float(order_or_position.get("profit", 0))
             else:
@@ -244,8 +249,13 @@ def create_table(data, is_pending=True) -> PrettyTable:
                     order_or_position.get("takeProfit", "")
                 ]
             table.add_row(row)
+                # Sort the table by the "Profit" column in descending order
+
         if not is_pending:
-            total_profit_row = ["TOTAL", "", "", "", "", "", "", round(total_profit, 2)]
+            table.sortby = "Profit"
+            table.reversesort = True
+            table.add_row(["", "", "", "", "", "", "", ""], divider=True)
+            total_profit_row = ["TOTAL", "", "", "", "", "", "", f"{round(total_profit, 2)} $"]
             table.add_row(total_profit_row)
         return table
     except Exception as e:
