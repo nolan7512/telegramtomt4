@@ -388,6 +388,7 @@ async def close_position(update: Update, context: CallbackContext) -> None:
 # Function to handle the /trailingstop command
 async def close_position_partially(update: Update, context: CallbackContext) -> None:
    # Get the string of position IDs and sizes from the command arguments
+    update.effective_message.reply_text("close_position_partially function")
     args = context.args
     command_str = "".join(map(str, args))
     update.effective_message.reply_text(f"List signal str: {command_str}.")
@@ -457,7 +458,12 @@ def handle_closeposition(update: Update, context: CallbackContext):
     asyncio.run(close_position(update,context))
 
 def handle_close_position_part(update: Update, context: CallbackContext):
-    asyncio.run(close_position_partially(update,context))
+    try:
+        # Chắc chắn rằng đây là một tin nhắn từ người dùng và có chứa lệnh /closepart
+        if update.message and update.message.text and update.message.text.startswith('/closepart'):
+            asyncio.run(close_position_partially(update, context))
+    except Exception as e:
+        print(f"Error handling /closepart command: {e}")
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
@@ -1216,8 +1222,10 @@ def main() -> None:
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('pendingorders'), handle_pending_orders))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('opentrades'), handle_open_trades))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('trailingstop'),handle_trailingstop ))
-    dp.add_handler(MessageHandler(Filters.command & Filters.regex('closeposition'),close_position ))
-    dp.add_handler(MessageHandler(Filters.command & Filters.regex('closepart'),handle_close_position_part ))
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('closeposition'),handle_closeposition ))
+    #dp.add_handler(MessageHandler(Filters.command & Filters.regex('closepart'),handle_close_position_part ))
+    close_part_handler = MessageHandler(Filters.text & (~Filters.command), handle_close_position_part)
+    dp.add_handler(close_part_handler)
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
