@@ -339,7 +339,7 @@ async def trailing_stop(update: Update, args) -> None:
             if position['stopLoss']:
                 stopLoss = position['stopLoss']
             else:
-                stopLoss = None
+                stopLoss = "None"
 
             if position['takeProfit']:
                 await connection.modify_position(
