@@ -334,15 +334,13 @@ async def trailing_stop(update: Update, args) -> None:
                 takeProfit=position.takeProfit  # Keep takeProfit unchanged
             )
 
-            update.effective_message.reply_text(f"Trailing stop set for position ID {intposition_id}. Successfully")
+            update.effective_message.reply_text(f"Trailing stop set for position ID {intposition_id} - Change SL :{position.stopLoss} to Entry:{position.openPrice}. Successfully")
 
         except ValueError:
             update.effective_message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
 
 async def close_position(update: Update, args) -> None:
    # Get the string of position IDs from the command arguments
-    update.effective_message.reply_text("close_position function")
-    update.effective_message.reply_text(f"args: {args}")
     if not args:
         update.effective_message.reply_text("Please provide a list of position IDs.")
         return
@@ -388,7 +386,6 @@ async def close_position(update: Update, args) -> None:
 
 async def close_position_partially(update: Update, args) -> None:
    # Get the string of position IDs and sizes from the command arguments
-    update.effective_message.reply_text("close_position_partially function")
     if not args or '|' not in args[0]:
         update.effective_message.reply_text("Please provide a list of position IDs and sizes separated by '|'.")
         return
@@ -456,7 +453,7 @@ async def account_info(update: Update) -> None:
         connection = account.get_rpc_connection()
         await connection.connect()
         await connection.wait_synchronized()
-        account_information = await connection.account_information()
+        account_information = await connection.get_account_information()
         logger.info(f"Account Info : {account_information}")
         # Tạo PrettyTable
         table = PrettyTable(['Title', 'Value'])
