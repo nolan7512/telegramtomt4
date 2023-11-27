@@ -336,28 +336,31 @@ async def trailing_stop(update: Update, args) -> None:
             # Modify the position with trailing stop parameters
             
 
-            if position['stopLoss']:
-                stopLoss = position['stopLoss']
-            else:
-                stopLoss = "None"
+            # Check if stopLoss exists, set to its value or None
+            stopLoss = position['stopLoss'] if 'stopLoss' in position else None
 
-            if position['takeProfit']:
-                await connection.modify_position(
+            # Check if takeProfit exists, set to its value or None
+            takeProfit = position['takeProfit'] if 'takeProfit' in position else None
+
+            # Modify the position with trailing stop parameters
+            await connection.modify_position(
                 intposition_id,
-                stop_loss = position['openPrice'], # Set stopLoss to the openPrice
-                take_profit = position['takeProfit']        
-                )
-            else:
-                await connection.modify_position(
-                intposition_id,
-                stop_loss = position['openPrice'] # Set stopLoss to the openPrice       
-                )
-            
-            update.effective_message.reply_text(f"Trailing stop set for position ID ({intposition_id}) - Change SL :{stopLoss} to Entry:{position['openPrice']}. Successfully")
+                stop_loss=position['openPrice'],  # Set stopLoss to the openPrice
+                take_profit=takeProfit  # Set takeProfit to its existing value or None if it doesn't exist
+            )
+
+            update.effective_message.reply_text(
+                f"Trailing stop set for position ID ({intposition_id}) - Change SL :{stopLoss} to Entry:{position['openPrice']}. Successfully"
+            )
 
         except ValueError:
-            update.effective_message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
-
+            update.effective_message.reply_text(
+                f"Invalid position ID: {intposition_id}. Please provide valid integers."
+            )
+        except Exception as e:
+            update.effective_message.reply_text(
+                f"Error TrailingStop Position ID {position_id}: {str(e)}."
+            ) 
 async def close_position(update: Update, args) -> None:
    # Get the string of position IDs from the command arguments
     if not args:
