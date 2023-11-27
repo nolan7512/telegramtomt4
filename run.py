@@ -191,13 +191,13 @@ def create_table(data, is_pending=True) -> PrettyTable:
         table = PrettyTable()      
         headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
         table.align["Id"] = "l"
-        table.align["Type"] = "1"  
+        table.align["Type"] = "l"  
         table.align["Symbol"] = "l" 
         table.align["Size"] = "l"  
-        table.align["Entry"] = "c"
-        table.align["SL"] = "c"  
-        table.align["TP"] = "c"
-        table.align["Profit"] = "c"  
+        table.align["Entry"] = "l"
+        table.align["SL"] = "l"  
+        table.align["TP"] = "l"
+        table.align["Profit"] = "l"  
         if not is_pending:
             data_key = "positions" 
             table.title = "Opening Trades"      
@@ -464,7 +464,7 @@ async def account_info(update: Update) -> None:
         # Tạo PrettyTable
         table = PrettyTable(['Title', 'Value'])
         table.align["Title"] = "l" 
-        table.align["Value"] = "c"
+        table.align["Value"] = "l"
         # Thêm dữ liệu vào PrettyTable
         # Chọn các trường bạn muốn hiển thị
         fields_to_display = ['balance', 'equity', 'margin', 'freeMargin', 'leverage', 'marginLevel']
@@ -1125,18 +1125,18 @@ def help(update: Update, context: CallbackContext) -> None:
         context: CallbackContext object that stores commonly used objects in handler callbacks
     """
 
-    help_message = "This bot is used to automatically enter trades onto your MetaTrader account directly from Telegram. To begin, ensure that you are authorized to use this bot by adjusting your Python script or environment variables.\n\nThis bot supports all trade order types (Market Execution, Limit, and Stop)\n\nAfter an extended period away from the bot, please be sure to re-enter the start command to restart the connection to your MetaTrader account."
-    commands = "List of commands:\n/start : displays welcome message\n/help : displays list of commands and example trades\n/trade : takes in user inputted trade for parsing and placement\n/calculate : calculates trade information for a user inputted trade"
-    trade_example = "Example Trades 💴:\n\n"
+    help_message = "This AI bot is used to automatically enter trades onto your MetaTrader account directly from Telegram. To begin, ensure that you are authorized to use this bot by adjusting your Python script or environment variables.\n\nThis bot supports all trade order types (Market Execution, Limit, and Stop)\n"
+    #commands = "List of commands:\n/start : displays welcome message\n/help : displays list of commands and example trades\n/trade : takes in user inputted trade for parsing and placement\n/calculate : calculates trade information for a user inputted trade"
+    #trade_example = "Example Trades 💴:\n\n"
     # market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nSL 1.14336\nTP 1.28930\nTP 1.29845\n\n"
     # limit_example = "Limit Execution:\nBUY LIMIT GBPUSD\nEntry 1.14480\nSL 1.14336\nTP 1.28930\n\n"
     # note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP1 while the other uses TP2.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
-    commandtrade = "open_trades/pending_orders"
+    commandtrade = "Bot commands:\n/accountinfo : Check infomation account\n /open_trades : Check all Opening Position\n/pending_orders : Check all Pending Orders\n/closeposition id,id,id \n/closepart id,id|size,size \n/trailingstop id,id,id"
     # sends messages to user
     update.effective_message.reply_text(help_message)
-    update.effective_message.reply_text(commands)
+    #update.effective_message.reply_text(commands)
     # update.effective_message.reply_text(trade_example + market_execution_example + limit_example + note + commandtrade)
-    update.effective_message.reply_text( commandtrade)
+    update.effective_message.reply_text(commandtrade)
     return
 
 def cancel(update: Update, context: CallbackContext) -> int:
