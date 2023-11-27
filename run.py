@@ -254,8 +254,7 @@ def create_table(data, is_pending=True) -> PrettyTable:
         if not is_pending:
             table.sortby = "Profit"
             table.reversesort = True
-            table.add_row(["", "", "", "", "", "", "", ""], divider=True)
-            total_profit_row = ["TOTAL", "", "", "", "", "", "", f"{round(total_profit, 2)} $"]
+            total_profit_row = ["TOTAL PROFIT", "", "", "", "", "", "", f"{round(total_profit, 2)} $"]
             table.add_row(total_profit_row)
         return table
     except Exception as e:
@@ -465,8 +464,8 @@ async def account_info(update: Update) -> None:
         logger.info(f"Account Info : {account_information}")
         # Tạo PrettyTable
         table = PrettyTable(['Title', 'Value'])
-        table.align["Title"] = "1" 
-        table.align["Value"] = "1"
+        table.align["Title"] = "l" 
+        table.align["Value"] = "c"
         # Thêm dữ liệu vào PrettyTable
         # Chọn các trường bạn muốn hiển thị
         fields_to_display = ['balance', 'equity', 'margin', 'freeMargin', 'leverage', 'marginLevel']
