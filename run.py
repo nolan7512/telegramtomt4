@@ -329,7 +329,7 @@ async def trailing_stop(update: Update, context: CallbackContext) -> None:
     for position_id in position_ids:
         try:
             # Convert position ID to an integer (assuming it's a valid integer)
-            intposition_id = int(position_id)
+            intposition_id = str(position_id)
 
             # Get position information
             position = await connection.get_position(intposition_id)
@@ -351,7 +351,7 @@ async def close_position(update: Update, context: CallbackContext) -> None:
     # Get the string of position IDs from the command arguments
     args = context.args
     if not args:
-        update.message.reply_text("Please provide a list of position IDs.")
+        update.effective_message.reply_text("Please provide a list of position IDs.")
         return
 
     # Combine the arguments into a single string, then split it into a list of position IDs
@@ -378,25 +378,27 @@ async def close_position(update: Update, context: CallbackContext) -> None:
     for position_id in position_ids:
         try:
             # Convert position ID to an integer (assuming it's a valid integer)
-            intposition_id = int(position_id)
+            intposition_id = str(position_id)
 
             # close position 
             await connection.close_position(intposition_id)         
-            update.message.reply_text(f"Closed Position ID {intposition_id}. Successfully")
+            update.effective_message.reply_text(f"Closed Position ID {intposition_id}. Successfully")
 
         except ValueError:
-            update.message.reply_text(f"Invalid Position ID: {intposition_id}. Please provide valid integers.")
+            update.effective_message.reply_text(f"Invalid Position ID: {intposition_id}. Please provide valid integers.")
 # Function to handle the /trailingstop command
 async def close_position_partially(update: Update, context: CallbackContext) -> None:
    # Get the string of position IDs and sizes from the command arguments
     args = context.args
     if not args or '|' not in args[0]:
-        update.message.reply_text("Please provide a list of position IDs and sizes separated by '|'.")
+        update.effective_message.reply_text("Please provide a list of position IDs and sizes separated by '|'.")
         return
 
     # Split the arguments into position IDs and sizes
     position_args = args[0].split('|')
     listID = position_args[0].split(',')
+    # listID_str = ', '.join(map(str, listID))
+    # update.effective_message.reply_text(f"List ID: {listID_str}.")
     listSize = list(map(float, position_args[1].split(',')))
     api = MetaApi(API_KEY)
     account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
@@ -419,11 +421,11 @@ async def close_position_partially(update: Update, context: CallbackContext) -> 
     for i, position_id in enumerate(listID):
         try:
             # Convert position ID to an integer (assuming it's a valid integer)
-            intposition_id = int(position_id)
+            intposition_id = str(position_id)
 
             # Kiểm tra nếu không tồn tại phần tử tương ứng trong listSize
             if i >= len(listSize):
-                update.message.reply_text(f"No size provided for Position ID {intposition_id}.")
+                update.effective_message.reply_text(f"No size provided for Position ID {intposition_id}.")
                 break
 
             size = float(listSize[i])
@@ -431,12 +433,12 @@ async def close_position_partially(update: Update, context: CallbackContext) -> 
             # Close a part of the position
             await connection.close_position_partially(intposition_id, size)
 
-            update.message.reply_text(f"Closed a part of Position ID {intposition_id} successfully.")
+            update.effective_message.reply_text(f"Closed a part : {size} lot of Position ID {intposition_id} successfully.")
 
         except ValueError:
-            update.message.reply_text(f"Invalid position ID: {position_id}. Please provide valid integers.")
+            update.effective_message.reply_text(f"Invalid position ID: {position_id}. Please provide valid integers.")
         except Exception as e:
-            update.message.reply_text(f"Error closing part of Position ID {position_id}: {str(e)}.")
+            update.effective_message.reply_text(f"Error closing part of Position ID {position_id}: {str(e)}.")
 
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
@@ -449,6 +451,9 @@ def handle_trailingstop(update: Update, context: CallbackContext):
 
 def handle_closeposition(update: Update, context: CallbackContext):
     asyncio.run(close_position(update,context))
+
+def handle_close_position_part(update: Update, context: CallbackContext):
+    asyncio.run(close_position_partially(update,context))
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
 #     first_line_with_order_type = next((i for i in range(len(signal)) if signal[i].upper().find(order_type_to_find, 0) != -1), -1)
@@ -1208,7 +1213,7 @@ def main() -> None:
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('opentrades'), handle_open_trades))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('trailingstop'),handle_trailingstop ))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('closeposition'),close_position ))
-    dp.add_handler(MessageHandler(Filters.command & Filters.regex('closepart'),close_position ))
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('closepart'),handle_close_position_part ))
     dp.add_handler(MessageHandler(Filters.text, TotalMessHandle))
 
     # log all errors
