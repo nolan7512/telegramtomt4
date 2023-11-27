@@ -348,6 +348,7 @@ async def close_position(update: Update, context: CallbackContext) -> None:
    # Get the string of position IDs from the command arguments
     update.effective_message.reply_text("close_position function")
     args = context.args
+    update.effective_message.reply_text(f"args: {context.args}")
     if not args:
         update.effective_message.reply_text("Please provide a list of position IDs.")
         return
