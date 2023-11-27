@@ -326,6 +326,7 @@ async def trailing_stop(update: Update, args) -> None:
 
             # Get position information
             position = await connection.get_position(intposition_id)
+            update.effective_message.reply_text(f"Get Position ({intposition_id}) infomation : {position}")
 
             # Modify the position with trailing stop parameters
             await connection.modify_position(
