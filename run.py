@@ -344,11 +344,10 @@ async def trailing_stop(update: Update, context: CallbackContext) -> None:
         except ValueError:
             update.message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
 
-async def close_position(update: Update, context: CallbackContext) -> None:
+async def close_position(update: Update, args) -> None:
    # Get the string of position IDs from the command arguments
     update.effective_message.reply_text("close_position function")
-    args = context.args
-    update.effective_message.reply_text(f"args: {context.args}")
+    update.effective_message.reply_text(f"args: {args}")
     if not args:
         update.effective_message.reply_text("Please provide a list of position IDs.")
         return
@@ -449,13 +448,16 @@ def handle_open_trades(update: Update, context: CallbackContext):
     asyncio.run(open_trades(update,context))
 
 def handle_trailingstop(update: Update, context: CallbackContext):
-    asyncio.run(trailing_stop(update,context))
+    args = context.args
+    asyncio.run(trailing_stop(update,args))
 
 def handle_closeposition(update: Update, context: CallbackContext):
-    asyncio.create_task(close_position(update, context))
+    args = context.args
+    asyncio.run(close_position(update, args))
 
 def handle_close_position_part(update: Update, context: CallbackContext):
-    asyncio.create_task(close_position_partially(update, context))
+    args = context.args
+    asyncio.run(close_position_partially(update, args))
 
 
 # def find_entry_point(trade: str, signal: list[str], signaltype : str) -> float:
