@@ -469,13 +469,16 @@ async def account_info(update: Update) -> None:
             field_name_vietnamese = {
                 'balance': 'Số dư',
                 'equity': 'Tài sản ròng',
-                'margin': 'Tiền đã ký quỹ',
-                'freeMargin': 'Số dư cho margin',
+                'margin': 'Tiền ký quỹ',
+                'freeMargin': 'Số dư margin',
                 'leverage': 'Đòn bẩy',
-                'marginLevel': 'Phần trăm ký quỹ'
+                'marginLevel': '% ký quỹ'
             }.get(field, field)
-
-            table.add_row([field_name_vietnamese + ' -', account_information.get(field, '')])
+            if field in ['balance', 'equity', 'margin', 'freeMargin']:
+                field_value = '$ {:,.2f}'.format(account_information.get(field, 0))
+            elif field == 'margin':
+                field_value = '{:.2f} %'.format(account_information.get(field, 0))
+            table.add_row([field + ' - ' + field_name_vietnamese  , field_value])
         # Gửi bảng dưới dạng tin nhắn HTML
         temp_table = f'<pre>{table}</pre>'
         update.message.reply_text(f'<pre>{temp_table}</pre>', parse_mode=ParseMode.HTML)
