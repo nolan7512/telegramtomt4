@@ -334,22 +334,25 @@ async def trailing_stop(update: Update, args) -> None:
             # Get position information
             position = await connection.get_position(intposition_id)
             # Modify the position with trailing stop parameters
-            if position['takeProfit']:
-                takeProfit = position['takeProfit']
-            else:
-                takeProfit = None
+            
 
             if position['stopLoss']:
                 stopLoss = position['stopLoss']
             else:
                 stopLoss = None
-                
-            await connection.modify_position(
+
+            if position['takeProfit']:
+                await connection.modify_position(
                 intposition_id,
                 stop_loss = position['openPrice'], # Set stopLoss to the openPrice
-                take_profit = takeProfit        
-            )
-
+                take_profit = position['takeProfit']        
+                )
+            else:
+                await connection.modify_position(
+                intposition_id,
+                stop_loss = position['openPrice'] # Set stopLoss to the openPrice       
+                )
+            
             update.effective_message.reply_text(f"Trailing stop set for position ID ({intposition_id}) - Change SL :{stopLoss} to Entry:{position['openPrice']}. Successfully")
 
         except ValueError:
