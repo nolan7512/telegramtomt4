@@ -188,8 +188,6 @@ def create_table(data, is_pending=True) -> PrettyTable:
             # Nếu không phải là chuỗi hoặc danh sách, xử lý lỗi hoặc trả về
             raise ValueError("Invalid data format")
         
-        # print('Create Table ---------------------------------------------')
-        # print(json_data)
         table = PrettyTable()      
         headers = ["Id", "Type", "Symbol", "Size", "Entry", "SL", "TP","Profit"]
         table.align["Id"] = "l"
@@ -213,8 +211,6 @@ def create_table(data, is_pending=True) -> PrettyTable:
         total_profit = 0
         for order_or_position in json_data:
             # Truy cập thông tin từng vị thế hoặc order tùy thuộc vào loại dữ liệu
-            print('Create Table Child ---------------------------------------------')
-            print(order_or_position)
             if data_key == "positions":
                 order_type = order_or_position.get("type", "")
                 if order_type.startswith("POSITION_TYPE_"):
@@ -338,10 +334,10 @@ async def trailing_stop(update: Update, args) -> None:
                 takeProfit=position.takeProfit  # Keep takeProfit unchanged
             )
 
-            update.message.reply_text(f"Trailing stop set for position ID {intposition_id}. Successfully")
+            update.effective_message.reply_text(f"Trailing stop set for position ID {intposition_id}. Successfully")
 
         except ValueError:
-            update.message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
+            update.effective_message.reply_text(f"Invalid position ID: {intposition_id}. Please provide valid integers.")
 
 async def close_position(update: Update, args) -> None:
    # Get the string of position IDs from the command arguments
@@ -439,6 +435,60 @@ async def close_position_partially(update: Update, args) -> None:
         except Exception as e:
             update.effective_message.reply_text(f"Error closing Position ID {position_id}: {str(e)}.")
 
+
+async def account_info(update: Update) -> None:
+    try:
+        # Đoạn mã JSON của bạn
+        api = MetaApi(API_KEY)
+        account = await api.metatrader_account_api.get_account(ACCOUNT_ID)
+        initial_state = account.state
+        deployed_states = ['DEPLOYING', 'DEPLOYED']
+
+        if initial_state not in deployed_states:
+            #  wait until account is deployed and connected to broker
+            logger.info('Deploying account')
+            await account.deploy()
+
+        logger.info('Waiting for API server to connect to broker ...')
+        await account.wait_connected()
+
+        # connect to MetaApi API
+        connection = account.get_rpc_connection()
+        await connection.connect()
+        await connection.wait_synchronized()
+        account_information = await connection.account_information()
+        logger.info(f"Account Info : {account_information}")
+        # Tạo PrettyTable
+        table = PrettyTable(['Title', 'Value'])
+        table.align["Title"] = "1" 
+        table.align["Value"] = "1"
+        # Thêm dữ liệu vào PrettyTable
+        # Chọn các trường bạn muốn hiển thị
+        fields_to_display = ['balance', 'equity', 'margin', 'freeMargin', 'leverage', 'marginLevel']
+
+        # Thêm dữ liệu vào PrettyTable
+        for field in fields_to_display:
+            # Chuyển đổi tên trường thành tiếng Việt
+            field_name_vietnamese = {
+                'balance': 'Số dư',
+                'equity': 'Tài sản ròng',
+                'margin': 'Tiền đã ký quỹ',
+                'freeMargin': 'Số dư cho margin',
+                'leverage': 'Đòn bẩy',
+                'marginLevel': 'Phần trăm ký quỹ'
+            }.get(field, field)
+
+            table.add_row([field_name_vietnamese + ' -', account_information.get(field, '')])
+        # Gửi bảng dưới dạng tin nhắn HTML
+        temp_table = f'<pre>{table}</pre>'
+        update.message.reply_text(f'<pre>{temp_table}</pre>', parse_mode=ParseMode.HTML)
+    except Exception as e:
+        update.effective_message.reply_text(f"Error get Account Infomation: {str(e)}.")
+    
+
+def handle_account_info(update: Update, context: CallbackContext):
+    asyncio.run(account_info(update))
+
 def handle_pending_orders(update: Update, context: CallbackContext):
     asyncio.run(pending_orders(update,context))
 
@@ -451,7 +501,6 @@ def handle_trailingstop(update: Update, context: CallbackContext):
 
 def handle_closeposition(update: Update, context: CallbackContext):
     args = update.message.text.split(' ')[1:]
-    args = context.args
     asyncio.run(close_position(update, args))
 
 def handle_close_position_part(update: Update, context: CallbackContext):
@@ -1213,6 +1262,7 @@ def main() -> None:
     # message handler for all messages that are not included in conversation handler
     """"dp.add_handler(MessageHandler(Filters.text, unknown_command))"""
     """"dp.add_handler(MessageHandler(Filters.text,TotalMessHandle()))"""
+    dp.add_handler(MessageHandler(Filters.command & Filters.regex('accountinfo'), handle_account_info))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('pendingorders'), handle_pending_orders))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('opentrades'), handle_open_trades))
     dp.add_handler(MessageHandler(Filters.command & Filters.regex('trailingstop'),handle_trailingstop ))
