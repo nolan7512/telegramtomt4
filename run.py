@@ -983,7 +983,7 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                             elif trade['OrderType'] == 'Sell Now':
                                 result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
                             elif trade['OrderType'] == 'Sell Limit':
-                                result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit),trailing_stop_config
+                                result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
                             elif trade['OrderType'] == 'Sell Stop':
                                 result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit,trailing_stop_config)
                     else:
