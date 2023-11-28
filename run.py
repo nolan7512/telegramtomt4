@@ -979,9 +979,9 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                             elif trade['OrderType'] == 'Buy Stop':
                                 result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
                             elif trade['OrderType'] == 'Sell':
-                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit,trailing_stop_config)
+                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
                             elif trade['OrderType'] == 'Sell Now':
-                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit,trailing_stop_config)
+                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
                             elif trade['OrderType'] == 'Sell Limit':
                                 result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit),trailing_stop_config
                             elif trade['OrderType'] == 'Sell Stop':
@@ -1029,8 +1029,7 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 
                 # prints success message to console
                 logger.info('\nTrade entered successfully!')
-                logger.info('Result Code: {}\n'.format(result['stringCode']))
-            
+                logger.info(f"\nResult Code: {result['stringCode']}\n")          
             except Exception as error:
                 logger.info(f"\nTrade failed with error: {error}\n")
                 update.effective_message.reply_text(f"There was an issue 😕\n\nError Message:\n{error}")
