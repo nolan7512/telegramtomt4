@@ -956,8 +956,7 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                     if TRAILINGSTOP == 'Y' and len(trade['TP']) >= 2:
                         entryTrade = float(trade['Entry'])
                         tradeFirstTP = float(trade['TP'][0])
-                        trailing_stop_config =  {
-                                                    "threshold": {
+                        trailing_stop_config =   {
                                                                     "thresholds": [
                                                                     {
                                                                         "threshold": tradeFirstTP,
@@ -966,8 +965,8 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                                                                     ],
                                                                     "units": "ABSOLUTE_PRICE",
                                                                     "stopPriceBase": "CURRENT_PRICE"
-                                                                }
                                                 }
+                                                
                         # Tiếp tục thực hiện lệnh tương ứng
                         for takeProfit in trade['TP']:
                             if trade['OrderType'] == 'Buy':
