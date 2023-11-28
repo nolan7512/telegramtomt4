@@ -954,16 +954,18 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 if PLAN == 'A' :
                     # Kiểm tra nếu trailing stop được kích hoạt và có ít nhất 2 TP
                     if TRAILINGSTOP == 'Y' and len(trade['TP']) >= 2:
+                        entryTrade = float(trade['Entry'])
+                        tradeFirstTP = float(trade['TP'][0])
                         trailing_stop_config = {
-                            "trailingStopLoss": {
-                                "thresholds": [
+                            'trailingStopLoss': {
+                                'thresholds': [
                                     {
-                                        "threshold": trade['TP'][0],
-                                        "stopLoss": trade['Entry']
+                                        'threshold': tradeFirstTP,
+                                        'stopLoss': entryTrade
                                     }
                                 ],
-                                "units": "ABSOLUTE_PRICE",
-                                "stopPriceBase": "CURRENT_PRICE"
+                                'units': 'ABSOLUTE_PRICE',
+                                'stopPriceBase': 'CURRENT_PRICE'
                             }
                         }
                         # Tiếp tục thực hiện lệnh tương ứng
