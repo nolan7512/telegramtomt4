@@ -964,7 +964,8 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                                         'stopLoss': entryTrade
                                     }
                                 ],
-                                'units': 'ABSOLUTE_PRICE'
+                                'units': 'ABSOLUTE_PRICE',
+                                'stopPriceBase': 'CURRENT_PRICE'
                             }
                         }
                         # Tiếp tục thực hiện lệnh tương ứng
