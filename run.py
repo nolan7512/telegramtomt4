@@ -652,14 +652,6 @@ def ParseSignal(signal: str) -> dict:
                       trade['Entry'] = float(getentrybyline)
                   else:
                       trade['Entry'] = ''
-
-        # elif(getentryfirstline == '' and signal[1] != ''):            
-        #    trade['Entry'] = float((signal[1].split())[-1]) 
-           
-        # else:
-        #     trade['Entry'] = float((signal[2].split())[-1])
-
-
     # checks wheter or not to convert entry to float because of market exectution option ("NOW")
     if((trade['OrderType'] == 'Buy Limit' or trade['OrderType'] == 'Sell Limit') and flagbuyentry == 0):
         oneline = re.split('[a-z]+|[-,/,@]',signal[0] ,flags=re.IGNORECASE)[-1]
@@ -960,24 +952,57 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 # produces a table with trade information
                 GetTradeInformation(update, trade, account_information['balance'])
                 if PLAN == 'A' :
-                # Tiếp tục thực hiện lệnh tương ứng
-                    for takeProfit in trade['TP']:
-                        if trade['OrderType'] == 'Buy':
-                            result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Buy Now':
-                            result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Buy Limit':
-                            result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Buy Stop':
-                            result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Sell':
-                            result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Sell Now':
-                            result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Sell Limit':
-                            result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
-                        elif trade['OrderType'] == 'Sell Stop':
-                            result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                    # Kiểm tra nếu trailing stop được kích hoạt và có ít nhất 2 TP
+                    if TRAILINGSTOP == 'Y' and len(trade['TP']) >= 2:
+                        trailing_stop_config = {
+                            "trailingStopLoss": {
+                                "thresholds": [
+                                    {
+                                        "threshold": trade['TP'][0],
+                                        "stopLoss": trade['Entry']
+                                    }
+                                ],
+                                "units": "ABSOLUTE_PRICE",
+                                "stopPriceBase": "CURRENT_PRICE"
+                            }
+                        }
+                        # Tiếp tục thực hiện lệnh tương ứng
+                        for takeProfit in trade['TP']:
+                            if trade['OrderType'] == 'Buy':
+                                result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
+                            elif trade['OrderType'] == 'Buy Now':
+                                result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
+                            elif trade['OrderType'] == 'Buy Limit':
+                                result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
+                            elif trade['OrderType'] == 'Buy Stop':
+                                result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
+                            elif trade['OrderType'] == 'Sell':
+                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit,trailing_stop_config)
+                            elif trade['OrderType'] == 'Sell Now':
+                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit,trailing_stop_config)
+                            elif trade['OrderType'] == 'Sell Limit':
+                                result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit),trailing_stop_config
+                            elif trade['OrderType'] == 'Sell Stop':
+                                result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit,trailing_stop_config)
+                    else:
+                        # Tiếp tục thực hiện lệnh tương ứng
+                        for takeProfit in trade['TP']:
+                            if trade['OrderType'] == 'Buy':
+                                result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Buy Now':
+                                result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Buy Limit':
+                                result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Buy Stop':
+                                result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Sell':
+                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Sell Now':
+                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Sell Limit':
+                                result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                            elif trade['OrderType'] == 'Sell Stop':
+                                result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
                 elif PLAN == 'B' :
                     for i, take_profit in enumerate(trade['TP']):
                         position_size = trade['PositionSize'][i]
