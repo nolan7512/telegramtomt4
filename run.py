@@ -956,36 +956,142 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                     if TRAILINGSTOP == 'Y' and len(trade['TP']) >= 2:
                         entryTrade = float(trade['Entry'])
                         tradeFirstTP = float(trade['TP'][0])
-                        trailing_stop_config = {
-                            'trailingStopLoss': {
-                                'thresholds': [
-                                    {
-                                        'threshold': tradeFirstTP,
-                                        'stopLoss': entryTrade
-                                    }
-                                ],
-                                'units': 'ABSOLUTE_PRICE',
-                                'stopPriceBase': 'CURRENT_PRICE'
-                            }
-                        }
+                        trailing_stop_config =  {
+                                                    "threshold": {
+                                                    "thresholds": [
+                                                        {
+                                                        "threshold": 2100,
+                                                        "stopLoss": 2060
+                                                        }
+                                                    ],
+                                                    "units": "ABSOLUTE_PRICE",
+                                                    "stopPriceBase": "CURRENT_PRICE"
+                                                    }
+                                                }
                         # Tiếp tục thực hiện lệnh tương ứng
-                        for takeProfit in trade['TP']:
-                            if trade['OrderType'] == 'Buy':
-                                result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Buy Now':
-                                result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Buy Limit':
-                                result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Buy Stop':
-                                result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Sell':
-                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Sell Now':
-                                result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Sell Limit':
-                                result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, trailing_stop_config)
-                            elif trade['OrderType'] == 'Sell Stop':
-                                result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit,trailing_stop_config)
+                        for i, takeProfit in enumerate(trade['TP']):
+                            if i >= 1:
+                                if trade['OrderType'] == 'Buy':
+                                    result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": tradeFirstTP,
+                                                            "stopLoss": entryTrade
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Buy Now':
+                                    result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Buy Limit':
+                                    result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Buy Stop':
+                                    result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Sell':
+                                    result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Sell Now':
+                                    result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Sell Limit':
+                                    result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, {
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                                elif trade['OrderType'] == 'Sell Stop':
+                                    result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit,{
+                                                        "threshold": {
+                                                        "thresholds": [
+                                                            {
+                                                            "threshold": 2100,
+                                                            "stopLoss": 2060
+                                                            }
+                                                        ],
+                                                        "units": "ABSOLUTE_PRICE",
+                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                        }
+                                                    })
+                            else:                          
+                                if trade['OrderType'] == 'Buy':
+                                    result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Buy Now':
+                                    result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Buy Limit':
+                                    result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Buy Stop':
+                                    result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Sell':
+                                    result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Sell Now':
+                                    result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Sell Limit':
+                                    result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
+                                elif trade['OrderType'] == 'Sell Stop':
+                                    result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit)
                     else:
                         # Tiếp tục thực hiện lệnh tương ứng
                         for takeProfit in trade['TP']:
@@ -1029,10 +1135,13 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 
                 # prints success message to console
                 logger.info('\nTrade entered successfully!')
-                logger.info(f"\nResult Code: {result['stringCode']}\n")          
+                logger.info(f"\nResult Code: {result}\n")          
             except Exception as error:
-                logger.info(f"\nTrade failed with error: {error}\n")
-                update.effective_message.reply_text(f"There was an issue 😕\n\nError Message:\n{error}")
+                if error['stringCode'] == 'ERR_NO_ERROR' | error['numericCode'] == 0:
+                     logger.info(f"\nTrade with ERR_NO_ERROR : {error}\n")
+                else:
+                    logger.info(f"\nTrade failed with error: {error}\n")
+                    update.effective_message.reply_text(f"There was an issue 😕\n\nError Message:\n{error}")
     
     except Exception as error:
         logger.error(f'Error: {error}')
