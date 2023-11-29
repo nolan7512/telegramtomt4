@@ -974,106 +974,106 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                                 if trade['OrderType'] == 'Buy':
                                     result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": tradeFirstTP,
-                                                            "stopLoss": entryTrade
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Buy Now':
                                     result = await connection.create_market_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Buy Limit':
                                     result = await connection.create_limit_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Buy Stop':
                                     result = await connection.create_stop_buy_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Sell':
                                     result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Sell Now':
                                     result = await connection.create_market_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Sell Limit':
                                     result = await connection.create_limit_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit, {
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
-                                                            }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                         }
                                                     })
                                 elif trade['OrderType'] == 'Sell Stop':
                                     result = await connection.create_stop_sell_order(trade['Symbol'], trade['PositionSize'] / len(trade['TP']), trade['Entry'], trade['StopLoss'], takeProfit,{
                                                         "threshold": {
-                                                        "thresholds": [
-                                                            {
-                                                            "threshold": 2100,
-                                                            "stopLoss": 2060
+                                                            "thresholds": [
+                                                                {
+                                                                    "threshold": tradeFirstTP,
+                                                                    "stopLoss": entryTrade
+                                                                }
+                                                            ],
+                                                            "units": "ABSOLUTE_PRICE",
+                                                            "stopPriceBase": "CURRENT_PRICE"
                                                             }
-                                                        ],
-                                                        "units": "ABSOLUTE_PRICE",
-                                                        "stopPriceBase": "CURRENT_PRICE"
-                                                        }
                                                     })
                             else:                          
                                 if trade['OrderType'] == 'Buy':
