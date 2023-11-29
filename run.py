@@ -960,8 +960,8 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                                                     "threshold": {
                                                     "thresholds": [
                                                         {
-                                                        "threshold": 2100,
-                                                        "stopLoss": 2060
+                                                        "threshold": tradeFirstTP,
+                                                        "stopLoss": entryTrade
                                                         }
                                                     ],
                                                     "units": "ABSOLUTE_PRICE",
@@ -1136,15 +1136,15 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                 # prints success message to console
                 logger.info('\nTrade entered successfully!')
                 logger.info(f"\nResult Code: {result}\n")          
-            except Exception as error:
-                if error['stringCode'] == 'ERR_NO_ERROR' | error['numericCode'] == 0:
-                     logger.info(f"\nTrade with ERR_NO_ERROR : {error}\n")
+            except Exception as errors:
+                if errors['stringCode'] == 'ERR_NO_ERROR' | errors['numericCode'] == 0:
+                     logger.info(f"\nTrade with ERR_NO_ERROR : {errors}\n")
                 else:
-                    logger.info(f"\nTrade failed with error: {error}\n")
-                    update.effective_message.reply_text(f"There was an issue 😕\n\nError Message:\n{error}")
+                    logger.info(f"\nTrade failed with error: {errors}\n")
+                    update.effective_message.reply_text(f"There was an issue 😕\n\nError Message:\n{errors}")
     
     except Exception as error:
-        logger.error(f'Error: {error}')
+        logger.error(f'Error Trade: {error}')
         update.effective_message.reply_text(f"There was an issue with the connection 😕\n\nError Message:\n{error}")
     
     return
