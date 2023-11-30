@@ -996,7 +996,7 @@ async def ConnectMetaTrader(update: Update, trade: dict, enterTrade: bool):
                                                     }
                                                 }
 
-                        threshold_TP1 = math.floor(((trade['TP'][0] - trade['Entry']) * 0.8)+ trade['Entry'])
+                        threshold_TP1 = (trade['Entry'] + ((trade['TP'][0] - trade['Entry']) * 0.8))
                         decimal_places_entry = len(str(price['bid']).split('.')[-1]) if '.' in str(price['bid']) else 0
                         if decimal_places_entry == 0:
                             threshold_TP1 = round(threshold_TP1)
