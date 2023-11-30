@@ -543,15 +543,15 @@ def handle_open_trades(update: Update, context: CallbackContext):
     asyncio.run(open_trades(update,context))
 
 def handle_trailingstop(update: Update, context: CallbackContext):
-    args = update.message.text.split(' ')[1:]
+    args = update.effective_message.text.split(' ')[1:]
     asyncio.run(trailing_stop(update,args))
 
 def handle_closeposition(update: Update, context: CallbackContext):
-    args = update.message.text.split(' ')[1:]
+    args = update.effective_message.text.split(' ')[1:]
     asyncio.run(close_position(update, args))
 
 def handle_close_position_part(update: Update, context: CallbackContext):
-    args = update.message.text.split(' ')[1:]
+    args = update.effective_message.text.split(' ')[1:]
     asyncio.run(close_position_partially(update, args))
 
 
