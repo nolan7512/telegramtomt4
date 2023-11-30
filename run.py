@@ -373,7 +373,7 @@ async def trailing_stop(update: Update, args) -> None:
             )
 
             update.effective_message.reply_text(
-                f"Trailing stop set for position ID ({intposition_id}) - Change SL :{stopLoss} to Entry:{position['openPrice']}. Successfully"
+                f"Trailing stop set for position ID ({intposition_id}) - Change SL :  {stopLoss} to Entry: {position['openPrice']}. Successfully"
             )
 
         except ValueError:
@@ -471,7 +471,7 @@ async def close_position_partially(update: Update, args) -> None:
             # Close a part of the position
             await connection.close_position_partially(position_id, size)
 
-            update.effective_message.reply_text(f"Closed a part : {size} lot of Position ID {position_id} successfully.")
+            update.effective_message.reply_text(f"Closed a part : {size} lot of Position ID : {position_id} successfully.")
         except ValueError:
             update.effective_message.reply_text(f"Invalid Position ID: {position_id}. Please provide valid integers.")
         except Exception as e:
